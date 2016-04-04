@@ -87,7 +87,6 @@
     <Compile Include="Assets\Rocks and Boulders 2\Standard Assets\Image Effects (Pro Only)\SepiaToneEffect.cs" />
     <Compile Include="Assets\Rocks and Boulders 2\Standard Assets\Image Effects (Pro Only)\TwirlEffect.cs" />
     <Compile Include="Assets\Rocks and Boulders 2\Standard Assets\Image Effects (Pro Only)\VortexEffect.cs" />
-    <Compile Include="Assets\Scripts\GameManager.cs" />
     <Compile Include="Assets\_MK\_MKGlowSystem\_Demo\Code\MK_DemoControl.cs" />
     <Compile Include="Assets\_MK\_MKGlowSystem\_Demo\Code\MK_RotateObject.cs" />
     <Compile Include="Assets\_MK\_MKGlowSystem\_Internal\MKGlow.cs" />
