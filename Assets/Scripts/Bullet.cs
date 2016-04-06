@@ -30,6 +30,7 @@ public class Bullet : MonoBehaviour
 			{
 				// create explosion and destroy bullet
 				transform.position = hit.point;
+                hit.point = hit.point + hit.normal * 0.2f;
 				if (Explosion)
 					Instantiate(Explosion, hit.point, Quaternion.FromToRotation(Vector3.forward, hit.normal));
 				Destroy(gameObject);
