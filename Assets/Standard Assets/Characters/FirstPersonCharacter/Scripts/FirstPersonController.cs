@@ -4,6 +4,13 @@ using UnityStandardAssets.CrossPlatformInput;
 using UnityStandardAssets.Utility;
 using Random = UnityEngine.Random;
 
+/*
+* @Written by: Unity
+* @Modified by: Joshua Hurn, Jake Nye
+* @Last Modified: 06/04/2016
+*
+* This class controls the movement and shooting of the FPS object
+*/
 namespace UnityStandardAssets.Characters.FirstPerson
 {
 
@@ -42,6 +49,16 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private float m_NextStep;
         private bool m_Jumping;
         private AudioSource m_AudioSource;
+
+        public int health = 100; // player health
+        
+        public GameObject gun; // gun of the player
+        public GameObject bullet; // bullet for player
+        public GameObject bulletSpawnPoint; // spawn location for player
+
+        //Bullet shooting rate
+        public float shootRate = 0.5f;
+        protected float elapsedTime;
 
         // Use this for initialization
         private void Start()
@@ -83,6 +100,23 @@ namespace UnityStandardAssets.Characters.FirstPerson
             }
 
             m_PreviouslyGrounded = m_CharacterController.isGrounded;
+
+            //Player shooting via mouse click
+            if (Input.GetButton("Fire1"))
+            {
+                if (elapsedTime >= shootRate)
+                {
+                    //Reset the time
+                    elapsedTime = 0.0f;
+
+                    //Also Instantiate over the PhotonNetwork
+                    if ((bulletSpawnPoint) & (bullet))
+                        Instantiate(bullet, bulletSpawnPoint.transform.position, bulletSpawnPoint.transform.rotation);
+                }
+            }
+
+            // Update the time
+            elapsedTime += Time.deltaTime;
         }
 
 
