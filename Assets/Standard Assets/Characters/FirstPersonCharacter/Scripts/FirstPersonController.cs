@@ -60,6 +60,10 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public float shootRate = 0.5f;
         protected float elapsedTime;
 
+        //Spawning after death
+        public Transform[] spawnPositions = new Transform[6];
+        private Boolean respawn;
+
         // Use this for initialization
         private void Start()
         {
@@ -74,6 +78,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
             m_Jumping = false;
             m_AudioSource = GetComponent<AudioSource>();
 			m_MouseLook.Init(transform , m_Camera.transform);
+
+            respawn = false;
         }
 
 
@@ -117,6 +123,22 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
             // Update the time
             elapsedTime += Time.deltaTime;
+
+            //check if player is alive or dead
+            if (health <= 0)
+                //death scene here
+                //gizmo saying wait 10 seconds
+                //if waited 10 seconds
+                respawn = true;
+            else
+                respawn = false;
+
+            if (respawn)
+            {
+                //Respawn player in 1 of 6 random spawn locations at ally base
+                transform.position = spawnPositions[Random.Range(0, spawnPositions.Length)].position;
+                health = 100;
+            }
         }
 
 
