@@ -37,7 +37,7 @@ public class Bullet : MonoBehaviour
 				
 				// apply damage to object
 				GameObject obj = hit.collider.gameObject;
-				if ((obj.tag == "Player") | (obj.tag == "EnemyTank"))
+				if (obj.tag == "Player") 
 					obj.SendMessage("ApplyDamage", damage);
 			}
 		}
