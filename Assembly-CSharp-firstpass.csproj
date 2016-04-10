@@ -139,6 +139,7 @@
      <None Include="Assets\_MK\_MKGlowSystem\_Shader\_MKBase\Mobile\MK_Mobile-DiffuseBumped.shader" />
      <None Include="Assets\Rocks and Boulders 2\Standard Assets\Image Effects (Pro Only)\_Sources\Shaders\Contrast Stretch\Apply.shader" />
      <None Include="Assets\Standard Assets\Environment\Water\Water4\Shaders\FXWater4Simple.shader" />
+     <None Include="Assets\Flag\Shaders\FlagCulling.shader" />
      <None Include="Assets\Rocks and Boulders 2\Standard Assets\Image Effects (Pro Only)\_Sources\Shaders\frag_ao.cginc" />
      <None Include="Assets\_MK\_MKGlowSystem\_Shader\_MKBase\Particles\MK_Particles-MulitplyDouble.shader" />
      <None Include="Assets\_MK\_MKGlowSystem\_Shader\_MKBase\Particles\MK_Particles-Additive.shader" />
