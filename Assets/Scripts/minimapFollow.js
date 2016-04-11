@@ -6,7 +6,7 @@
 * Done in Javascript over C# as C# is unable to get these exact positions without having issues
 */
 
-var player : Transform; //references the player in the GUI
+var player : Transform; //references the player transform properties in the GUI
 var storedShadowDistance : float;
 
 function Update () {
