@@ -98,6 +98,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Flag\Shaders\FlagCulling.shader" />
+    <None Include="Assets\Fonts\hammerhead2\readme.txt" />
     <None Include="Assets\Rocks and Boulders 2\Shaders\Blend SM2.shader" />
     <None Include="Assets\Rocks and Boulders 2\Shaders\Blend SM3.shader" />
     <None Include="Assets\Rocks and Boulders 2\Shaders\Desaturate\DesaturateEffect.shader" />
