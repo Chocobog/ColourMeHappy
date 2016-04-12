@@ -91,6 +91,7 @@
     <Compile Include="Assets\Scripts\GameManager.cs" />
     <Compile Include="Assets\Scripts\MinimapBorder.cs" />
     <Compile Include="Assets\Scripts\SimpleFSM.cs" />
+    <Compile Include="Assets\Scripts\menuScript.cs" />
     <Compile Include="Assets\_MK\_MKGlowSystem\_Demo\Code\MK_DemoControl.cs" />
     <Compile Include="Assets\_MK\_MKGlowSystem\_Demo\Code\MK_RotateObject.cs" />
     <Compile Include="Assets\_MK\_MKGlowSystem\_Internal\MKGlow.cs" />
