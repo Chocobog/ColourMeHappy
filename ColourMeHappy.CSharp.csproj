@@ -89,6 +89,7 @@
     <Compile Include="Assets\Rocks and Boulders 2\Standard Assets\Image Effects (Pro Only)\VortexEffect.cs" />
     <Compile Include="Assets\Scripts\Bullet.cs" />
     <Compile Include="Assets\Scripts\GameManager.cs" />
+    <Compile Include="Assets\Scripts\Gradient.cs" />
     <Compile Include="Assets\Scripts\MinimapBorder.cs" />
     <Compile Include="Assets\Scripts\SimpleFSM.cs" />
     <Compile Include="Assets\Scripts\menuScript.cs" />
