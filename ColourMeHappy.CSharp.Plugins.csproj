@@ -117,6 +117,11 @@
     <Compile Include="Assets\Standard Assets\Utility\WaypointProgressTracker.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Assets\Characters\Monster\shaders\bumpSpecmap.shader" />
+    <None Include="Assets\Characters\Monster\shaders\caveShader.shader" />
+    <None Include="Assets\Characters\Monster\shaders\metalA.shader" />
+    <None Include="Assets\Characters\Monster\shaders\monsterShader.shader" />
+    <None Include="Assets\Characters\Monster\shaders\vertexAnim.shader" />
     <None Include="Assets\Flag\Shaders\FlagCulling.shader" />
     <None Include="Assets\Fonts\hammerhead2\readme.txt" />
     <None Include="Assets\Rocks and Boulders 2\Shaders\Blend SM2.shader" />
@@ -189,6 +194,7 @@
     <None Include="Assets\Standard Assets\Environment\Water\Water4\Shaders\FXWater4Advanced.shader" />
     <None Include="Assets\Standard Assets\Environment\Water\Water4\Shaders\FXWater4Simple.shader" />
     <None Include="Assets\Standard Assets\Environment\Water\Water4\Shaders\WaterInclude.cginc" />
+    <None Include="Assets\Standard Assets\Image Effects (Pro Only)\_Sources\Shaders\_BloomAndFlares\MobileBloom.shader" />
     <None Include="Assets\_MK\_MKGlowSystem\_Shader\_MKBase\Cutout\MK_Cutout-Diffuse.shader" />
     <None Include="Assets\_MK\_MKGlowSystem\_Shader\_MKBase\Cutout\MK_Cutout-DiffuseBumpSpec.shader" />
     <None Include="Assets\_MK\_MKGlowSystem\_Shader\_MKBase\Cutout\MK_Cutout-DiffuseBumped.shader" />
