@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityStandardAssets.CrossPlatformInput;
 using UnityStandardAssets.Utility;
 using Random = UnityEngine.Random;
@@ -49,8 +50,6 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private float m_NextStep;
         private bool m_Jumping;
         private AudioSource m_AudioSource;
-
-        public int health = 100; // player health
         
         public GameObject gun; // gun of the player
         public GameObject bullet; // bullet for player
@@ -63,6 +62,24 @@ namespace UnityStandardAssets.Characters.FirstPerson
         //Spawning after death
         public Transform[] spawnPositions = new Transform[6];
         private Boolean respawn;
+
+        //HUD
+        public int health = 100; // player health
+        public float gameTimeLeft = 600; //10 minute time limit
+        
+        public int playerClip = 10; //ammo clip of player
+        public int playerTotalAmmo = 50; //total ammo of player
+        public int scoreAlly; //score of ally team
+        public int scoreEnemy; //score of enemy team
+        public GameObject[] perksAvailable; //perks player can activate
+
+        public Text healthTxt;
+        public Text gameTimeLeftTxt;
+        public Text playerAmmoTxt;
+        public Text scoreAllyTxt;
+        public Text scoreEnemyTxt;
+        public Text perksAvailableTxt;
+        public Image[] perksAvailableImg;
 
         // Use this for initialization
         private void Start()
@@ -82,10 +99,29 @@ namespace UnityStandardAssets.Characters.FirstPerson
             respawn = false;
         }
 
-
         // Update is called once per frame
         private void Update()
         {
+            //set game time presentation
+            int minutes = Mathf.FloorToInt(gameTimeLeft / 60F);
+            int seconds = Mathf.FloorToInt(gameTimeLeft - minutes * 60);
+            string displayTime = string.Format("{0:0}:{1:00}", minutes, seconds);
+
+            //update HUD elements
+            healthTxt.text = "Health: " + health.ToString();
+            gameTimeLeftTxt.text = "Time left: " + displayTime;
+            playerAmmoTxt.text = "Ammo: " + playerClip.ToString() + "/" + playerTotalAmmo.ToString();
+            scoreAllyTxt.text = scoreAlly.ToString();
+            scoreEnemyTxt.text = scoreEnemy.ToString();
+            perksAvailableTxt.text = "Perks " + perksAvailableImg; //currently not showing image
+
+            gameTimeLeft -= Time.deltaTime;
+            //when time is up end the game
+            if (gameTimeLeft <= 0)
+            {
+                gameOver();
+            }
+
             RotateView();
             // the jump state needs to read here to make sure it is not missed
             if (!m_Jump)
@@ -117,7 +153,13 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
                     //Also Instantiate over the PhotonNetwork
                     if ((bulletSpawnPoint) & (bullet))
-                        Instantiate(bullet, bulletSpawnPoint.transform.position, bulletSpawnPoint.transform.rotation);
+                    {
+                        GameObject spawnOrigin = (GameObject) Instantiate(bullet, bulletSpawnPoint.transform.position, bulletSpawnPoint.transform.rotation);
+                        spawnOrigin.SendMessage("spawnOrigin", gameObject);
+                        //Instantiate(bullet, bulletSpawnPoint.transform.position, bulletSpawnPoint.transform.rotation);
+
+                        //.SendMessage("spawnOrigin");
+                    }
                 }
             }
 
@@ -139,6 +181,19 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 transform.position = spawnPositions[Random.Range(0, spawnPositions.Length)].position;
                 health = 100;
             }
+        }
+
+        public void gameOver()
+        {
+            //disable player input
+            //disable enemy input
+            //stop timer counting down
+            if (scoreAlly > scoreEnemy) { }
+                //you win
+            else { }
+                //you lose
+            
+            //open menu saying play again or main menu
         }
 
 

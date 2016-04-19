@@ -70,7 +70,7 @@ function FixedUpdate()
 {
  	 
  	 var animator = GetComponent(Animator);
- 	 forward = GetComponent.<Camera>().main.transform.forward;
+ 	 //forward = GetComponent.<Camera>().main.transform.forward;
 	 right = new Vector3(forward.z, 0, -forward.x);
 	 var hor = Input.GetAxis("Horizontal");
 	 var ver = Input.GetAxis("Vertical");
@@ -125,15 +125,15 @@ function FixedUpdate()
 		
 		if (Input.GetButton("Fire2") && canrun && !isjumping)
 		{
-			targetVelocity *= runspeed;
-			velocityanim *= 2;
+			//targetVelocity *= runspeed;
+			//velocityanim *= 2;
 			
 			
 		}
 		else
 		{
-			targetVelocity *= speed;
-			velocityanim *= 1;
+			//targetVelocity *= speed;
+			//velocityanim *= 1;
 			
 			
 			
@@ -191,7 +191,7 @@ function FixedUpdate()
 	 	 weaponselect();	
 	 }
       
-	 animator.SetBool("grounded",grounded);	 
+	 //animator.SetBool("grounded",grounded);	 
      
      GetComponent.<Rigidbody>().AddForce(Vector3 (0, -gravity * GetComponent.<Rigidbody>().mass, 0));
      

@@ -7,21 +7,9 @@
 */
 
 var player : Transform; //references the player in the GUI
-var storedShadowDistance : float;
 
 function Update () {
     //Grabs the x and z co-ordinates of the player and does not show the y co-ordinates 
     gameObject.transform.position.x = player.transform.position.x; 
     gameObject.transform.position.z = player.transform.position.z;
-}
-
-
-function OnPreRender () {
-    storedShadowDistance = QualitySettings.shadowDistance;
-    QualitySettings.shadowDistance = 0;
-}
-
-
-function OnPostRender () {
-    QualitySettings.shadowDistance = storedShadowDistance;
 }

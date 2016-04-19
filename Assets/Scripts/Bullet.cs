@@ -9,8 +9,9 @@ public class Bullet : MonoBehaviour
 	public float speed = 200.0f;
 	public float lifeTime = 3.0f;
 	public int damage = 50;
-	
-	private Vector3 newPos;
+    public string bulletOrigin;
+
+    private Vector3 newPos;
 	
 	void Start()
 	{
@@ -19,6 +20,7 @@ public class Bullet : MonoBehaviour
 	
 	void Update()
 	{
+        //GameObject spawnOrigin = GetComponent(Bullet).spawn = gameObject;
 		// future position if bullet doesn't hit any colliders
 		newPos = transform.position + transform.forward * speed * Time.deltaTime;
 		
@@ -26,7 +28,7 @@ public class Bullet : MonoBehaviour
 		RaycastHit hit;
 		if (Physics.Linecast(transform.position, newPos, out hit))
 		{
-			if (hit.collider)
+			if (hit.collider && hit.collider.gameObject.tag != bulletOrigin)
 			{
 				// create explosion and destroy bullet
 				transform.position = hit.point;
@@ -37,7 +39,7 @@ public class Bullet : MonoBehaviour
 				
 				// apply damage to object
 				GameObject obj = hit.collider.gameObject;
-				if (obj.tag == "Player") 
+				if (obj.tag == "Player" || obj.tag == "Enemy") 
 					obj.SendMessage("ApplyDamage", damage);
 			}
 		}
@@ -47,5 +49,11 @@ public class Bullet : MonoBehaviour
 			transform.position = newPos;
 		}     
 	}
+
+    void spawnOrigin(GameObject g)
+    {
+        bulletOrigin = g.tag;
+        Debug.Log(bulletOrigin);
+    }
 	
 }

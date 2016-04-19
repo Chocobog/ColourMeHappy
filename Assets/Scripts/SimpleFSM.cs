@@ -19,10 +19,6 @@ public class SimpleFSM : MonoBehaviour
     public GameObject[] waypointList;
 
 	protected Transform playerTransform;// Player Transform
-
-	// Turret
-	public GameObject turret;
-	public float turretRotSpeed = 4.0f;
 	
     // Bullet
 	public GameObject bullet;
@@ -41,8 +37,6 @@ public class SimpleFSM : MonoBehaviour
 	public float attackRange = 20.0f;
 	public float attackRangeStop = 10.0f;
 
-	public GameObject explosion;
-	public GameObject smokeTrail;
 
     private NavMeshAgent nav;
     public int waypointLocation = 0;
@@ -85,6 +79,10 @@ public class SimpleFSM : MonoBehaviour
         // Go to dead state if no health left
         if (health <= 0)
             curState = FSMState.Dead;
+
+        Animator animator = GetComponent<Animator>();
+        //animator for walking on the ground
+        animator.SetBool("grounded", true);
     }
 
 	/*
@@ -163,12 +161,6 @@ public class SimpleFSM : MonoBehaviour
             nav.Stop();
         }
 
-        // Always Turn the turret towards the player
-		if (turret) {
-			Quaternion turretRotation = Quaternion.LookRotation(playerTransform.position - transform.position);
-        	turret.transform.rotation = Quaternion.Slerp(turret.transform.rotation, turretRotation, Time.deltaTime * turretRotSpeed); 
-		}
-
         // Shoot the bullets
         ShootBullet();
     }
@@ -183,7 +175,6 @@ public class SimpleFSM : MonoBehaviour
             bDead = true;
             nav.Stop();
             nav.enabled = false;
-            Explode();
         }
     }
 
@@ -205,29 +196,6 @@ public class SimpleFSM : MonoBehaviour
     public void ApplyDamage(int damage ) {
     	health -= damage;
     }
-
-
-    protected void Explode() {
-        float rndX = Random.Range(8.0f, 12.0f);
-        float rndZ = Random.Range(8.0f, 12.0f);
-        for (int i = 0; i < 3; i++) {
-            GetComponent<Rigidbody>().AddExplosionForce(10.0f, transform.position - new Vector3(rndX, 2.0f, rndZ), 45.0f, 40.0f);
-            GetComponent<Rigidbody>().velocity = transform.TransformDirection(new Vector3(rndX, 10.0f, rndZ));
-        }
-
-		if (smokeTrail) {
-			GameObject clone = Instantiate(smokeTrail, transform.position, transform.rotation) as GameObject;
-			clone.transform.parent = transform;
-		}
-		Invoke ("CreateFinalExplosion", 1.4f);
-		Destroy(gameObject, 1.5f);
-	}
-	
-	
-	protected void CreateFinalExplosion() {
-		if (explosion) 
-			Instantiate(explosion, transform.position, transform.rotation);
-	}
 
 
 	void OnDrawGizmos () {

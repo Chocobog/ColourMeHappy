@@ -27,7 +27,6 @@ public class menuScript : MonoBehaviour {
     public Button exit;
 
 
-
 	// Use this for initialization
 	void Start () {
         quitMenu = quitMenu.GetComponent<Canvas>();
@@ -88,8 +87,12 @@ public class menuScript : MonoBehaviour {
 
 
     //
-	// Update is called once per frame
-	void Update () {
-	    
-	}
+    // Update is called once per frame
+    void Update()
+    {
+    }
+
+    
+  
+    
 }
