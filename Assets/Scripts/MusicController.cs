@@ -18,7 +18,7 @@ public class MusicController : MonoBehaviour {
 
     void Update()
     {
-        //GetComponent<AudioSource>().loop = true;
+        //Play music
         StartCoroutine(playGameMusic());
     }
 

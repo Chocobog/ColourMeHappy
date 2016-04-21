@@ -120,6 +120,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             if (gameTimeLeft <= 0)
             {
                 gameOver();
+                gameTimeLeft = 0;
             }
 
             RotateView();
@@ -156,9 +157,6 @@ namespace UnityStandardAssets.Characters.FirstPerson
                     {
                         GameObject spawnOrigin = (GameObject) Instantiate(bullet, bulletSpawnPoint.transform.position, bulletSpawnPoint.transform.rotation);
                         spawnOrigin.SendMessage("spawnOrigin", gameObject);
-                        //Instantiate(bullet, bulletSpawnPoint.transform.position, bulletSpawnPoint.transform.rotation);
-
-                        //.SendMessage("spawnOrigin");
                     }
                 }
             }
@@ -187,7 +185,6 @@ namespace UnityStandardAssets.Characters.FirstPerson
         {
             //disable player input
             //disable enemy input
-            //stop timer counting down
             if (scoreAlly > scoreEnemy) { }
                 //you win
             else { }
