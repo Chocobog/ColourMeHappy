@@ -1,10 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using UnityStandardAssets.Characters.FirstPerson;
 
 /*
 * @Written By: Joshua Hurn
-* @Last Modified: 04/04/2016
+* @Last Modified: 23/04/2016
 *
 * This class managed the out of bounds areas that players are not allowed to enter
 * if they enter these areas they are given a 5 second count to return to the playable area
@@ -18,10 +19,11 @@ public class GameManager : MonoBehaviour
     private bool boundFlag; // triggered if they go out of bounds
     private string textTime; // text to tell player they have gone out of bounds
 
-    //private bool outOfBoundsFlash;
-    //private Image boundsImage;
-    //private float flashSpeed = 5.0f;
-    //private Color flashColour = new Color(1f, 0f, 0f, 0.1f);
+    //fade out effects
+    public float flashSpeed = 5f;
+    public Color flashColour;
+    private float alphaFadeValue = 0;
+    public Texture fader; //place holder texture
 
 
     // Use this for initialization
@@ -29,8 +31,9 @@ public class GameManager : MonoBehaviour
     {
         OutOfBounds.enabled = false; // hide the level completed text object
         boundFlag = false;
-        //outOfBoundsFlash = false;
+
     }
+
 
     // OnTriggerEnter is called when a collider enters this trigger
     void OnTriggerEnter(Collider col)
@@ -39,7 +42,6 @@ public class GameManager : MonoBehaviour
         if (col.gameObject.tag == "Player")
         {
             boundFlag = true;
-            //outOfBoundsFlash = true;
         }
     }
 
@@ -52,7 +54,6 @@ public class GameManager : MonoBehaviour
             boundFlag = false;
             outOfBoundsTimer = 5.0f;
             OutOfBounds.enabled = false;
-            //outOfBoundsFlash = false;
         }
     }
 
@@ -63,26 +64,36 @@ public class GameManager : MonoBehaviour
         {
             outOfBoundsTimer -= 1 * Time.deltaTime; //start counter
             textTime = string.Format("{0:0}", outOfBoundsTimer); //Show out of bounds message
-            OutOfBounds.text = "Out of bounds, please return to the map in " + textTime + " seconds";
+            OutOfBounds.text = "Out of bounds, please return to the game in " + textTime + " seconds or you will be shot";
             OutOfBounds.pixelOffset = new Vector2(0, 180); // ensure text is centred on screen
             OutOfBounds.enabled = true;
             //if timer reaches 0 Destroy object and reset timer
             if (textTime.Equals("0"))
             {
-                Destroy(col.gameObject);
+                GetComponent<FirstPersonController>().health = 0;
+                //Destroy(col.gameObject);
                 outOfBoundsTimer = 5.0f;
             }
         }
     }
 
-    // Update is called once per frame
-    void Update()
+    //controls the GUI elements on the screen
+    void OnGUI()
     {
-        //if (outOfBoundsFlash){
-        //  boundsImage.color = flashColour;
-        //} else {
-        //  boundsImage.color = Color.Lerp(boundsImage.color, Color.clear, flashSpeed * Time.deltaTime);
-        //}
+        //fades the screen out while the player is out of bounds
+        if (boundFlag == true)
+        {
+            //how long it takes to fade out - set at about 5-6 seconds
+            alphaFadeValue += Mathf.Clamp01(Time.deltaTime / 12);
+            GUI.color = new Color(0, 0, 0, alphaFadeValue);
+            //fader set to null, just place holder
+            GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), fader);
+        }
+        else 
+        {
+            //reset fader
+            alphaFadeValue = 0;
+        }
     }
 
 }

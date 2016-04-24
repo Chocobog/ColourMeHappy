@@ -1,6 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+
+/*
+* @Written by: AJ Abotomey
+* @Modified by: Joshua Hurn
+* @Last Modified: 23/04/2016
+*
+* This class controls the bullets shot from the players gun. Inflicts damage where needed and applies splatter effect on contact
+*/
 public class Bullet : MonoBehaviour
 {
 	//Explosion Effect
@@ -18,12 +26,12 @@ public class Bullet : MonoBehaviour
     /// </summary>
     public Transform PaintPrefab;
 
-    private int MinSplashs = 5;
-    private int MaxSplashs = 15;
-    private float SplashRange = 2f;
+    //private int MinSplashs = 5;
+   // private int MaxSplashs = 15;
+   // private float SplashRange = 2f;
 
-    private float MinScale = 0.25f;
-    private float MaxScale = 2.5f;
+   // private float MinScale = 0.25f;
+   // private float MaxScale = 2.5f;
 
 
     private Vector3 newPos;
@@ -33,13 +41,6 @@ public class Bullet : MonoBehaviour
 		Destroy(gameObject, lifeTime);
 	}
 
-    void Awake()
-    {
-        if (Instance != null) Debug.LogError("More than one Painter has been instanciated in this scene!");
-        Instance = this;
-
-        if (PaintPrefab == null) Debug.LogError("Missing Paint decal prefab!");
-    }
 
     void Update()
 	{
@@ -63,8 +64,8 @@ public class Bullet : MonoBehaviour
 
                 //apply damage to object
                GameObject obj = hit.collider.gameObject;
-                if (obj.tag == "Player" || obj.tag == "Enemy")
-                    obj.SendMessage("ApplyDamage", damage);
+                if (obj.tag == "Player" || obj.tag == "Enemy" || obj.tag == "Ally")
+                    obj.SendMessage("takeDamage", damage);
             }
         }
 

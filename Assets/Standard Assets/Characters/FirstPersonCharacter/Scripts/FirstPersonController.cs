@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityStandardAssets.CrossPlatformInput;
@@ -8,9 +10,10 @@ using Random = UnityEngine.Random;
 /*
 * @Written by: Unity
 * @Modified by: Joshua Hurn, Jake Nye
-* @Last Modified: 06/04/2016
+* @Last Modified: 24/04/2016
 *
 * This class controls the movement and shooting of the FPS object
+* contains HUD and game over controls due to being single player game
 */
 namespace UnityStandardAssets.Characters.FirstPerson
 {
@@ -36,6 +39,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         [SerializeField] private AudioClip[] m_FootstepSounds;    // an array of footstep sounds that will be randomly selected from.
         [SerializeField] private AudioClip m_JumpSound;           // the sound played when character leaves the ground.
         [SerializeField] private AudioClip m_LandSound;           // the sound played when character touches back on ground.
+        public bool canMove; // if the player can move or not
 
         private Camera m_Camera;
         private bool m_Jump;
@@ -63,23 +67,79 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public Transform[] spawnPositions = new Transform[6];
         private Boolean respawn;
 
-        //HUD
+        public int totalHealth = 100;
         public int health = 100; // player health
+        public int pickupHealth = 10; //when health picked up
+        public bool damaged = false;
         public float gameTimeLeft = 600; //10 minute time limit
-        
+
+        public int pickupAmmo = 5; //when ammo picked up
+        public int clipLimit = 10; //When reloading paintballs
         public int playerClip = 10; //ammo clip of player
         public int playerTotalAmmo = 50; //total ammo of player
         public int scoreAlly; //score of ally team
         public int scoreEnemy; //score of enemy team
+        public int scoreLimit = 3;
         public GameObject[] perksAvailable; //perks player can activate
+        public string allyFlagLocation = "At Base - "; //location of ally flag
+        public string enemyFlagLocation = "At Base - "; //location of enemy flag
 
-        public Text healthTxt;
+        //Perk images
+        public Sprite nimble;
+        public Sprite rapidFire;
+        public Sprite rejuv;
+        public Sprite shield;
+        public Sprite radar;
+        public bool assignNext;
+
+        //HUD
+        public Slider healthSlider;
+        public Slider ammoSlider;
         public Text gameTimeLeftTxt;
         public Text playerAmmoTxt;
         public Text scoreAllyTxt;
         public Text scoreEnemyTxt;
         public Text perksAvailableTxt;
         public Image[] perksAvailableImg;
+        public Image damageImage;
+        public Text allyFlagLocationTxt;
+        public Text enemyFlagLocationTxt;
+
+        //Flag Capture
+        public Transform flag;
+        public Transform flagHolder;
+        public string opposingFlag;
+        public string allyFlag;
+
+        //damage effects
+        public float flashSpeed = 5f;
+        public Color flashColour = new Color(1f, 0f, 0f, 0.1f);
+
+        //death timer
+        private float respawnCountdown = 10f; // time until player can respawn
+        private string textTime; // respawn timer passed to respawnInfo
+        public GUIText respawnInfo; // text on screen to tell player time left until respawn
+
+        //banner display
+        public Image victory;
+        public Image defeat;
+        public Image overTime;
+
+        public float overtimeCountdown = 3f;
+        private string overTimeText;
+        public bool isOvertime = false;
+        private float alphaFadeValue = 0;
+        public Texture fader; //place holder texture
+
+        //Reload animation
+        public Transform back;
+        public Transform forward;
+        public Transform clip;
+        public bool unloading;
+        public bool reloading;
+        public float delayReset = 1.5f;
+        public float delay = 1.5f;
+        public string delayTextTime;
 
         // Use this for initialization
         private void Start()
@@ -95,8 +155,14 @@ namespace UnityStandardAssets.Characters.FirstPerson
             m_Jumping = false;
             m_AudioSource = GetComponent<AudioSource>();
 			m_MouseLook.Init(transform , m_Camera.transform);
-
             respawn = false;
+            respawnInfo.enabled = false;
+            canMove = true;
+            unloading = false;
+            reloading = false;
+
+            opposingFlag = "RedFlag";
+            allyFlag = "BlueFlag";
         }
 
         // Update is called once per frame
@@ -108,20 +174,67 @@ namespace UnityStandardAssets.Characters.FirstPerson
             string displayTime = string.Format("{0:0}:{1:00}", minutes, seconds);
 
             //update HUD elements
-            healthTxt.text = "Health: " + health.ToString();
+            healthSlider.value = health;
+            ammoSlider.value = playerClip;
             gameTimeLeftTxt.text = "Time left: " + displayTime;
-            playerAmmoTxt.text = "Ammo: " + playerClip.ToString() + "/" + playerTotalAmmo.ToString();
+            playerAmmoTxt.text = playerClip.ToString() + " / " + playerTotalAmmo.ToString();
             scoreAllyTxt.text = scoreAlly.ToString();
             scoreEnemyTxt.text = scoreEnemy.ToString();
-            perksAvailableTxt.text = "Perks " + perksAvailableImg; //currently not showing image
+            allyFlagLocationTxt.text = allyFlagLocation;
+            enemyFlagLocationTxt.text = enemyFlagLocation;
 
             gameTimeLeft -= Time.deltaTime;
-            //when time is up end the game
-            if (gameTimeLeft <= 0)
+            //when time is up or if score limit is reached end the game
+            if (displayTime.Equals("0:00") || scoreAlly == scoreLimit || scoreEnemy == scoreLimit)
             {
-                gameOver();
+                if (scoreAlly != scoreEnemy)
+                    gameOver(); //end the game
+                else if (isOvertime == false) //first time through, show overtime message
+                    overTime.enabled = true; //currently drawing and going into overtime
+                if (overTime.enabled == true)
+                {
+                    overtimeCountdown -= 1 * Time.deltaTime; //start counter
+                    overTimeText = string.Format("{0:0}", overtimeCountdown); //easier text for comparison
+                    if (overTimeText.Equals("0"))
+                    {
+                        //stop showing overtime banner
+                        overTime.enabled = false;
+                        overtimeCountdown = 60f;
+                        isOvertime = true;
+                    }
+                }
                 gameTimeLeft = 0;
             }
+
+            //enter overtime due to draw
+            if (isOvertime)
+            {
+                overtimeCountdown -= 1 * Time.deltaTime; //start counter
+                overTimeText = string.Format("{0:0}", overtimeCountdown); //easier text for comparison
+                Debug.Log(overTimeText);
+                //if overtime ends
+                if (overTimeText.Equals("0"))
+                {
+                    isOvertime = false;
+                    gameOver();
+                }
+                //if in overtime and any team scores, end game
+                if(scoreAlly > scoreEnemy || scoreEnemy > scoreAlly)
+                {
+                    overTimeText.Equals("0");
+                }
+            }
+
+            //player is damaged from bullet
+            if (damaged) {
+                damageImage.color = flashColour;
+            } else
+            {
+                damageImage.color = Color.Lerp(damageImage.color, Color.clear, flashSpeed * Time.deltaTime);
+            }
+            damaged = false;
+
+            
 
             RotateView();
             // the jump state needs to read here to make sure it is not missed
@@ -152,12 +265,67 @@ namespace UnityStandardAssets.Characters.FirstPerson
                     //Reset the time
                     elapsedTime = 0.0f;
 
-                    //Also Instantiate over the PhotonNetwork
-                    if ((bulletSpawnPoint) & (bullet))
+                    //Shoot bullet if ammo is available and not unloading/reloading
+                    if ((bulletSpawnPoint) && (bullet) && playerClip > 0 || playerTotalAmmo > 0 && unloading == false && reloading == false)
                     {
-                        GameObject spawnOrigin = (GameObject) Instantiate(bullet, bulletSpawnPoint.transform.position, bulletSpawnPoint.transform.rotation);
+                        //update bullet count
+                        playerClip--;
+                        GameObject spawnOrigin = (GameObject)Instantiate(bullet, bulletSpawnPoint.transform.position, bulletSpawnPoint.transform.rotation);
                         spawnOrigin.SendMessage("spawnOrigin", gameObject);
+                        //Clip is empty and player needs to reload
+                        if (playerClip == 0)
+                        {
+                            if (playerTotalAmmo == 0) { /*do nothing*/ }
+                            //update player clip and minus total ammo
+                            else if (playerTotalAmmo > clipLimit)
+                            {
+                                unloading = true;
+                                playerClip += clipLimit;
+                                playerTotalAmmo -= playerClip;
+                            }
+                            //if total ammo is less or equal to standard clip amount, put all ammo in last clip
+                            else if (playerTotalAmmo <= clipLimit)
+                            {
+                                playerClip += playerTotalAmmo;
+                                playerTotalAmmo = 0;
+                            }
+                        }
                     }
+                    else
+                    {
+                        //show no ammo to player
+                    }
+                }
+            }
+
+            float percentageComplete = Time.time / 1f;
+            Vector3 temp = clip.transform.position; //temp holder 
+            //Animation for unloading ammoTube
+            if (unloading == true)
+            {
+                delay -= 1 * Time.deltaTime; //start counter
+                delayTextTime = string.Format("{0:0}", delay); //easier text for comparison
+                temp.z = back.transform.position.z;
+                clip.transform.position = Vector3.Lerp(temp, back.transform.position, percentageComplete / 25f); //slowly unload
+                if (delayTextTime.Equals("0"))
+                {
+                    unloading = false;
+                    reloading = true;
+                    delay = delayReset;
+                }
+            }
+            //Animation for reloading ammoTube
+            if (reloading)
+            {
+                delay -= 1 * Time.deltaTime; //start counter
+                delayTextTime = string.Format("{0:0}", delay); //easier text for comparison
+                temp.z = forward.transform.position.z;
+                clip.transform.position = Vector3.Lerp(temp, forward.transform.position, percentageComplete / 25f); //slowly reload
+                if (delayTextTime.Equals("0"))
+                {
+                    unloading = false;
+                    reloading = false;
+                    delay = delayReset;
                 }
             }
 
@@ -166,31 +334,110 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
             //check if player is alive or dead
             if (health <= 0)
-                //death scene here
-                //gizmo saying wait 10 seconds
-                //if waited 10 seconds
                 respawn = true;
             else
                 respawn = false;
-
+                
             if (respawn)
             {
-                //Respawn player in 1 of 6 random spawn locations at ally base
-                transform.position = spawnPositions[Random.Range(0, spawnPositions.Length)].position;
-                health = 100;
+                canMove = false;
+                //move player back to 1st spawn position
+                //if (transform.position != spawnPositions[0].position)
+                   //move player back to spawn location
+                //GameObject.FindGameObjectWithTag("Player").GetComponent<FirstPersonController>().enabled = false;
+                respawnCountdown -= 1 * Time.deltaTime; //start counter
+                textTime = string.Format("{0:0}", respawnCountdown); //Show respawn message
+                respawnInfo.text = "Respawn in " + textTime;
+                respawnInfo.pixelOffset = new Vector2(0, 180); // ensure text is centred on screen
+                respawnInfo.enabled = true;
+                Debug.Log(textTime);
+                Debug.Log(respawnInfo.enabled);
+                //if respawn time is up respawn player
+                if (textTime.Equals("0"))
+                {
+                    if (transform.position != spawnPositions[0].position)
+                        transform.position = spawnPositions[0].position;
+                    canMove = true;
+                    //GameObject.FindGameObjectWithTag("Player").GetComponent<FirstPersonController>().enabled = true;
+                    health = 100;
+                    respawnCountdown = 10.0f;
+                    respawnInfo.enabled = false;
+                }
             }
         }
 
+        //IEnumerator reload()
+        //{
+        //    //back animation
+            
+
+        //    //yield WaitForSeconds(2.0f);
+
+        //    //temp.z = forwardObj.transform.position.z;
+        //    //obj.transform.position = temp;
+            
+            
+            
+        //    //yield return new WaitForSeconds(2.0f);
+
+
+
+        //    //f
+        //    //Debug.Log("obj: " + obj.transform.position + " " + "Back " + backObj.transform.position + "Forward: " + forwardObj.transform.position);
+
+        //    //if ((int) obj.transform.position.z == (int) backObj.transform.position.z)
+        //    //{
+        //    //    Debug.Log("Success is your middle name");
+        //    //    //forward animation
+        //    //    obj.transform.position = Vector3.Lerp(transform.position, forwardObj.transform.position, percentageComplete / 100f);
+        //    //    Debug.Log("obj: " + obj.transform.position + " " + "Forward " + forwardObj.transform.position);
+        //    //}
+        //    yield return new WaitForSeconds(2.0f);
+        //}
+
+        /* 
+        * When perk effect added to player, adds it to the next available spot on the HUD
+        * to show the player what perk they have
+        * @Sprite s: sprite effect obtained by the player
+        */
+        private void addPerk(Sprite s)
+        {
+            for (int i = 0; i < perksAvailableImg.Length; i++)
+            {
+                //Add perk image to next available image slot
+                if (!perksAvailableImg[i].enabled == true && assignNext == false)
+                {
+                    perksAvailableImg[i].enabled = true;
+                    perksAvailableImg[i].overrideSprite = s;
+                    assignNext = true;
+                }
+            }
+        }
+
+        //When time limit reaches 0 the game will end
         public void gameOver()
         {
+            overtimeCountdown = 0;
             //disable player input
             //disable enemy input
-            if (scoreAlly > scoreEnemy) { }
+            if (scoreAlly > scoreEnemy)
+            {
                 //you win
-            else { }
+                victory.enabled = true;
+            }
+            else
+            {
                 //you lose
-            
+                defeat.enabled = true;
+            }
             //open menu saying play again or main menu
+        }
+
+        //Passed from the bullet script to inflict damage on the player
+        public void takeDamage(int damage)
+        {
+            damaged = true;
+            health -= damage;
         }
 
 
@@ -311,6 +558,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         private void GetInput(out float speed)
         {
+           
             // Read input
             float horizontal = CrossPlatformInputManager.GetAxis("Horizontal");
             float vertical = CrossPlatformInputManager.GetAxis("Vertical");
@@ -325,20 +573,19 @@ namespace UnityStandardAssets.Characters.FirstPerson
             // set the desired speed to be walking or running
             speed = m_IsWalking ? m_WalkSpeed : m_RunSpeed;
             m_Input = new Vector2(horizontal, vertical);
+                // normalize input if it exceeds 1 in combined length:
+                if (m_Input.sqrMagnitude > 1)
+                {
+                    m_Input.Normalize();
+                }
 
-            // normalize input if it exceeds 1 in combined length:
-            if (m_Input.sqrMagnitude > 1)
-            {
-                m_Input.Normalize();
-            }
-
-            // handle speed change to give an fov kick
-            // only if the player is going to a run, is running and the fovkick is to be used
-            if (m_IsWalking != waswalking && m_UseFovKick && m_CharacterController.velocity.sqrMagnitude > 0)
-            {
-                StopAllCoroutines();
-                StartCoroutine(!m_IsWalking ? m_FovKick.FOVKickUp() : m_FovKick.FOVKickDown());
-            }
+                // handle speed change to give an fov kick
+                // only if the player is going to a run, is running and the fovkick is to be used
+                if (m_IsWalking != waswalking && m_UseFovKick && m_CharacterController.velocity.sqrMagnitude > 0)
+                {
+                    StopAllCoroutines();
+                    StartCoroutine(!m_IsWalking ? m_FovKick.FOVKickUp() : m_FovKick.FOVKickDown());
+                }
         }
 
 
@@ -362,6 +609,74 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 return;
             }
             body.AddForceAtPosition(m_CharacterController.velocity*0.1f, hit.point, ForceMode.Impulse);
+        }
+
+        //When player collides with an object
+        public void OnTriggerEnter(Collider c)
+        {
+            //if this is not the players team flag then take the flag
+            if (c.gameObject.tag == opposingFlag)
+            {
+                //Add flag to player 
+                flag = c.transform;
+                flag.transform.parent = transform;
+                flag.transform.position = flagHolder.transform.position;
+                //update location of flag
+                enemyFlagLocation = "Taken - ";
+                
+            }
+            //if player returns to flag with enemy flag
+            if (c.gameObject.tag == allyFlag && flag != null)
+            {
+                //Destroy the flag gameObject
+                Destroy(flag.gameObject);
+                scoreAlly++;
+                //update location of flag
+                enemyFlagLocation = "At Base -";
+            }
+        }
+
+        //when player picks up ammo
+        public void ammoPickup (int i)
+        {
+            playerTotalAmmo += i;
+            //reload if this is the only ammo the player has
+            if (playerClip == 0)
+                playerClip = 0;
+                //reload();
+        }
+
+        //When player picks up health
+        public void healthPickup (int i)
+        {
+            //if health is not max
+            if (health != totalHealth)
+            {
+                if (health + i > totalHealth)
+                    health = totalHealth;
+                else
+                    health += i;
+            }
+        }
+
+        //controls the GUI elements on the screen
+        void OnGUI()
+        {
+            //fades the screen out while the player is in overtime mode
+            if (isOvertime == true)
+            {
+                Debug.Log("running in overtime");
+                //how long it takes to fade out - set at about 1 minute
+                alphaFadeValue += Mathf.Clamp01(Time.deltaTime / (overtimeCountdown * 10) * 1);
+                GUI.color = new Color(0, 0, 0, alphaFadeValue);
+                //fader set to null, just place holder
+                GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), fader);
+            }
+            else
+            {
+                //reset fader
+                alphaFadeValue = 0;
+            }
         }
     }
 }
