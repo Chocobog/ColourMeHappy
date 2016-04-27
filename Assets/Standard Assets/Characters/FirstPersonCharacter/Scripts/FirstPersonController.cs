@@ -164,6 +164,10 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
             opposingFlag = "RedFlag";
             allyFlag = "BlueFlag";
+
+            addPerk(rejuv);
+            assignNext = false;
+            addPerk(rapidFire);
         }
 
         // Update is called once per frame
@@ -367,35 +371,6 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 }
             }
         }
-
-        //IEnumerator reload()
-        //{
-        //    //back animation
-            
-
-        //    //yield WaitForSeconds(2.0f);
-
-        //    //temp.z = forwardObj.transform.position.z;
-        //    //obj.transform.position = temp;
-            
-            
-            
-        //    //yield return new WaitForSeconds(2.0f);
-
-
-
-        //    //f
-        //    //Debug.Log("obj: " + obj.transform.position + " " + "Back " + backObj.transform.position + "Forward: " + forwardObj.transform.position);
-
-        //    //if ((int) obj.transform.position.z == (int) backObj.transform.position.z)
-        //    //{
-        //    //    Debug.Log("Success is your middle name");
-        //    //    //forward animation
-        //    //    obj.transform.position = Vector3.Lerp(transform.position, forwardObj.transform.position, percentageComplete / 100f);
-        //    //    Debug.Log("obj: " + obj.transform.position + " " + "Forward " + forwardObj.transform.position);
-        //    //}
-        //    yield return new WaitForSeconds(2.0f);
-        //}
 
         /* 
         * When perk effect added to player, adds it to the next available spot on the HUD

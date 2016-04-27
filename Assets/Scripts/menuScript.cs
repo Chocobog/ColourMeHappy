@@ -20,11 +20,17 @@ public class menuScript : MonoBehaviour {
     public Canvas quitMenu;
     public Canvas optionsMenu;
     public Canvas upgradesMenu;
+	public Canvas creditsPage;
+	public Canvas howToPlayPage;
+
+	public Button how2play;
+	public Button credits;
     public Button start;
     public Button options;
     public Button upgrades;
     public Button backToStart;
     public Button exit;
+
 
 
 	// Use this for initialization
@@ -35,13 +41,29 @@ public class menuScript : MonoBehaviour {
         quitMenu.enabled = false;
         optionsMenu.enabled = false;
         upgradesMenu.enabled = false;
+		creditsPage.enabled = false;
+		howToPlayPage.enabled = false;
         
+	}
+
+	// handles the displaying and vertical movement of the credits canvas
+	public void rollCredits() {
+		startMenu.enabled = false;
+		creditsPage.enabled = true;
+	}
+
+	//
+	public void howtoplay() {
+		howToPlayPage.enabled = true;
+		startMenu.enabled = false;
+
 	}
 
     // disables the startmenu items enables the upgradeMenu items
     public void upgradesPress() {
         startMenu.enabled = false;
-        upgradesMenu.enabled = true;
+		upgradesMenu.enabled = true;
+
     }
 
     // shows options menu item list
@@ -58,6 +80,9 @@ public class menuScript : MonoBehaviour {
         optionsMenu.enabled = false;
         startMenu.enabled = true;
         upgradesMenu.enabled = false;
+		creditsPage.enabled = false;
+		howToPlayPage.enabled = false;
+
     }
 
     // handles the Exit btn click
@@ -87,12 +112,8 @@ public class menuScript : MonoBehaviour {
 
 
     //
-    // Update is called once per frame
-    void Update()
-    {
-    }
-
-    
-  
-    
+	// Update is called once per frame
+	void Update () {
+	    
+	}
 }
