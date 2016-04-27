@@ -93,6 +93,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public bool assignNext;
 
         //HUD
+        public Text healthTxt;
         public Slider healthSlider;
         public Slider ammoSlider;
         public Text gameTimeLeftTxt;
@@ -174,6 +175,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             string displayTime = string.Format("{0:0}:{1:00}", minutes, seconds);
 
             //update HUD elements
+            healthTxt.text = health.ToString();
             healthSlider.value = health;
             ammoSlider.value = playerClip;
             gameTimeLeftTxt.text = "Time left: " + displayTime;
