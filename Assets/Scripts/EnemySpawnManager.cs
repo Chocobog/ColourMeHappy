@@ -21,8 +21,9 @@ public class EnemySpawnManager : MonoBehaviour {
     //flag spawn
     private GameObject[] enemyFlag;
     public GameObject redFlag;
+    public GameObject redFlagMist; // 
     public Transform flagSpawn;
-
+    public Transform flagMistSpawn; //
 
 
 	// Use this for initialization
@@ -53,11 +54,20 @@ public class EnemySpawnManager : MonoBehaviour {
     void Update()
     {
         enemyFlag = GameObject.FindGameObjectsWithTag("RedFlag");
+        //flagMist = GameObject.FindGameObjectsWithTag("redFlagMist");
 
         //If no flag then create one
         if (enemyFlag.Length == 0)
         {
             Instantiate(redFlag, flagSpawn.position, redFlag.transform.rotation);
+            Debug.Log("Flag has been created!");
+            Instantiate(redFlagMist, flagSpawn.position, Quaternion.identity);
+            //redFlagMist.SetActive(true);
+            //Debug.Log("Mist has been created!");
+            //Instantiate(redFlagMist, flagSpawn.position, redFlagMist.transform.rotation);
+            Debug.Log("Flag mist has been created!");
         }
+
+
     }
 }

@@ -91,7 +91,7 @@ public class SimpleFSM : MonoBehaviour
     protected void UpdatePatrolState() {
 
         //move to next waypoint
-        if (Vector3.Distance(nav.transform.position, waypointList[waypointLocation].transform.position) <= 1.0f)
+        if (Vector3.Distance(nav.transform.position, waypointList[waypointLocation].transform.position) <= 2.0f)
         {
             waypointLocation++;
             //loop back
@@ -104,10 +104,9 @@ public class SimpleFSM : MonoBehaviour
         {
             nav.SetDestination(waypointList[waypointLocation].transform.position);
         }
-        
 
 		// Transitions
-        // Check the distance with player tank
+        // Check the distance
         // When the distance is near, transition to chase state
         if (Vector3.Distance(transform.position, playerTransform.position) <= chaseRange) {
             curState = FSMState.Chase;

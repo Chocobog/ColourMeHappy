@@ -108,6 +108,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         //Flag Capture
         public Transform flag;
+        public Transform flagMist;
         public Transform flagHolder;
         public string opposingFlag;
         public string allyFlag;
@@ -585,7 +586,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             {
                 return;
             }
-            body.AddForceAtPosition(m_CharacterController.velocity*0.1f, hit.point, ForceMode.Impulse);
+            body.AddForceAtPosition(m_CharacterController.velocity * 0.1f, hit.point, ForceMode.Impulse);
         }
 
         //When player collides with an object
@@ -600,6 +601,12 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 flag.transform.position = flagHolder.transform.position;
                 //update location of flag
                 enemyFlagLocation = "Taken - ";
+
+                //Add mist to player
+                flagMist = c.transform;
+                flagMist.transform.parent = transform;
+                flagMist.transform.position = flagHolder.transform.position;
+                
                 
             }
             //if player returns to flag with enemy flag
@@ -607,6 +614,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             {
                 //Destroy the flag gameObject
                 Destroy(flag.gameObject);
+                //Destroy(flagMist.gameObject);
                 scoreAlly++;
                 //update location of flag
                 enemyFlagLocation = "At Base -";
