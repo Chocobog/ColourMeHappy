@@ -6,7 +6,8 @@ using System.Collections;
 
 /*
  * @Written by: Jake Nye
- * @Date modified: 11/04/2016
+ * @Modified by: Joshua Hurn
+ * @Date modified: 30/04/2016
  *
  * This class instantiates all canvas / button elements so that they may be used in the functions.
  * This class handles all of the menu functionality. This includes the following: starting the game, opening up the game options,
@@ -31,6 +32,15 @@ public class menuScript : MonoBehaviour {
     public Button backToStart;
     public Button exit;
 
+    //Loading screen
+    private AsyncOperation async;
+    public Image[] loadingScreen;
+    public Text[] tips;
+    public Slider progressBar;
+    public Image progressBackground;
+    public Image progressFill;
+
+
 
 
 	// Use this for initialization
@@ -43,7 +53,8 @@ public class menuScript : MonoBehaviour {
         upgradesMenu.enabled = false;
 		creditsPage.enabled = false;
 		howToPlayPage.enabled = false;
-        
+        progressBackground.enabled = false;
+        progressFill.enabled = false;        
 	}
 
 	// handles the displaying and vertical movement of the credits canvas
@@ -52,18 +63,16 @@ public class menuScript : MonoBehaviour {
 		creditsPage.enabled = true;
 	}
 
-	//
+	// disables the startmenu items enables the howToPlay menu items
 	public void howtoplay() {
 		howToPlayPage.enabled = true;
 		startMenu.enabled = false;
-
 	}
 
     // disables the startmenu items enables the upgradeMenu items
     public void upgradesPress() {
         startMenu.enabled = false;
 		upgradesMenu.enabled = true;
-
     }
 
     // shows options menu item list
@@ -72,7 +81,6 @@ public class menuScript : MonoBehaviour {
         quitMenu.enabled = false;
         startMenu.enabled = false;
         upgradesMenu.enabled = false;
-
     }
 
     // disables the options menu and enables the start menu
@@ -82,7 +90,6 @@ public class menuScript : MonoBehaviour {
         upgradesMenu.enabled = false;
 		creditsPage.enabled = false;
 		howToPlayPage.enabled = false;
-
     }
 
     // handles the Exit btn click
@@ -90,7 +97,6 @@ public class menuScript : MonoBehaviour {
         quitMenu.enabled = true;
         start.enabled = false;
         exit.enabled = false;
-
     }
 
     // exits the exit prompt
@@ -100,20 +106,35 @@ public class menuScript : MonoBehaviour {
         exit.enabled = true;
     }
 
-    // starts the game
+    // Load the first level
     public void startLevel() {
-        SceneManager.LoadScene("MainLevel");
+        StartCoroutine(LoadScreen("MainLevel"));
+    }
+
+    //show loading screen while level loads in the backgrund
+    IEnumerator LoadScreen(string level)
+    {
+        //Get random load screen and tip
+        int Loadindex = Random.Range(0, loadingScreen.Length);
+        int tipIndex = Random.Range(0, tips.Length);
+        //show loading screen and tip
+        loadingScreen[Loadindex].enabled = true;
+        tips[tipIndex].enabled = true;
+        progressBackground.enabled = true;
+        progressFill.enabled = true;
+        //Load main level in background while loading screen is shown
+        async = SceneManager.LoadSceneAsync(level);
+        //Progress bar while level is being loaded
+        while (!async.isDone)
+        {
+            //Update progress bar
+            progressBar.value = (int)(async.progress * 100);
+            yield return null;
+        }
     }
 
     // exits the game
     public void exitGame() {
         Application.Quit();
     }
-
-
-    //
-	// Update is called once per frame
-	void Update () {
-	    
-	}
 }
