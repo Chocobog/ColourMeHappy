@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityStandardAssets.CrossPlatformInput;
 using UnityStandardAssets.Utility;
@@ -10,7 +11,7 @@ using Random = UnityEngine.Random;
 /*
 * @Written by: Unity
 * @Modified by: Joshua Hurn, Jake Nye
-* @Last Modified: 24/04/2016
+* @Last Modified: 01/05/2016
 *
 * This class controls the movement and shooting of the FPS object
 * contains HUD and game over controls due to being single player game
@@ -85,12 +86,40 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public string enemyFlagLocation = "At Base - "; //location of enemy flag
 
         //Perk images
-        public Sprite nimble;
-        public Sprite rapidFire;
-        public Sprite rejuv;
+        public Sprite Nimble;
+        public Sprite rapid;
+        public Sprite Rejuv;
         public Sprite shield;
         public Sprite radar;
         public bool assignNext;
+
+        public List<Sprite> listOfPerks; //All perks in game
+        public List<String> currentPerks; //Perks the player currently has
+
+        //Perk effects
+        public GameObject shieldEffect;
+        public GameObject nimbleEffect;
+        public GameObject rejuvenationEffect;
+        public GameObject rapidFireEffect;
+        public GameObject radarEffect;
+
+        public bool invincible = false; //Says if the player can take damage or not
+
+        //Perk countdown timers
+        private float rejuvCountdown;
+        private float nimbleCountdown;
+        private float shieldCountdown;
+        private float radarCountdown;
+        private float rapidCountdown;
+        public float perkResetTimer = 30f;
+        public int tempPerk = 0;
+
+        //Gate to allow times for perks
+        private bool rejuvCounter = false;
+        private bool nimbleCounter = false;
+        private bool shieldCounter = false;
+        private bool rapidCounter = false;
+        private bool radarCounter = false;
 
         //HUD
         public Text healthTxt;
@@ -143,6 +172,18 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public float delay = 1.5f;
         public string delayTextTime;
 
+        //exit game interface
+        public Canvas pauseMenu;
+        public Canvas quitOptions;
+
+        //Loading screen on exit
+        private AsyncOperation async;
+        public Image[] loadingScreen;
+        public Text[] tips;
+        public Slider progressBar;
+        public Image progressBackground;
+        public Image progressFill;
+
         // Use this for initialization
         private void Start()
         {
@@ -166,9 +207,22 @@ namespace UnityStandardAssets.Characters.FirstPerson
             opposingFlag = "RedFlag";
             allyFlag = "BlueFlag";
 
-            addPerk(rejuv);
-            assignNext = false;
-            addPerk(rapidFire);
+            //Update perks that can be used in game
+            listOfPerks.Add(Nimble);
+            listOfPerks.Add(Rejuv);
+            listOfPerks.Add(rapid);
+            listOfPerks.Add(shield);
+            listOfPerks.Add(radar);
+
+            //Set to max perk time
+            rejuvCountdown = perkResetTimer;
+            nimbleCountdown = perkResetTimer;
+            shieldCountdown = perkResetTimer;
+            radarCountdown = perkResetTimer;
+            rapidCountdown = perkResetTimer;
+
+            /////TESTING////////
+            addPerkGUI(Rejuv);
         }
 
         // Update is called once per frame
@@ -213,12 +267,19 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 gameTimeLeft = 0;
             }
 
+            //Open pause menu on ESC
+            if (Input.GetKeyDown(KeyCode.Escape))
+                openPauseMenu();
+
+            //Use your perk
+            if (Input.GetKeyDown(KeyCode.C))
+                usePerk();
+
             //enter overtime due to draw
             if (isOvertime)
             {
                 overtimeCountdown -= 1 * Time.deltaTime; //start counter
                 overTimeText = string.Format("{0:0}", overtimeCountdown); //easier text for comparison
-                Debug.Log(overTimeText);
                 //if overtime ends
                 if (overTimeText.Equals("0"))
                 {
@@ -241,7 +302,96 @@ namespace UnityStandardAssets.Characters.FirstPerson
             }
             damaged = false;
 
-            
+            //rejuv activated
+            if (rejuvCounter)
+            {
+                rejuvCountdown -= 1 * Time.deltaTime; //start countdown
+                if ((int)rejuvCountdown != 0)
+                {
+                    if ((int)rejuvCountdown %5 == 0 && health < totalHealth && (int)rejuvCountdown != tempPerk)
+                    {
+                        tempPerk = (int)rejuvCountdown;
+                    //within 5 HP radius, give full health
+                    if (health >= totalHealth - 10)
+                        health = totalHealth;
+                    //give 5 HP
+                    else
+                        health += 10;
+                    }
+                }
+                else
+                {
+                    //perk ended, reset back to default
+                    rejuvCounter = false;
+                    rejuvCountdown = perkResetTimer;
+                    rejuvenationEffect.SetActive(false);
+                }
+            }
+
+            //nimble activated
+            if (nimbleCounter)
+            {
+                nimbleCountdown -= 1 * Time.deltaTime; //start countdown
+                if ((int)nimbleCountdown != 0)
+                    m_RunSpeed *= 2; //double the run speed
+                else
+                {
+                    //perk ended, reset back to default
+                    m_RunSpeed /= 2;
+                    nimbleCounter = false;
+                    nimbleCountdown = perkResetTimer;
+                    nimbleEffect.SetActive(false);
+                }
+            }
+
+            //rapid fire activated
+            if (rapidCounter)
+            {
+                rapidCountdown -= 1 * Time.deltaTime; //start countdown
+                if ((int)rapidCountdown != 0)
+                    shootRate /= 2; //half time needed to shoot
+                else
+                {
+                    //perk ended, reset back to default
+                    shootRate *= 2;
+                    rapidCounter = false;
+                    rapidCountdown = perkResetTimer;
+                    rapidFireEffect.SetActive(false);
+                }
+            }
+
+            //shield activated 
+            if (shieldCounter)
+            {
+                shieldCountdown -= 1 * Time.deltaTime; //start countdown
+                if ((int)shieldCountdown != 0)
+                    invincible = true; //player cannot be hurt
+                else
+                {
+                    //perk ended, reset back to default
+                    invincible = false;
+                    shieldCounter = false;
+                    shieldCountdown = perkResetTimer;
+                    shieldEffect.SetActive(false);
+                }
+
+            }
+
+            //radar activated
+            if (radarCounter)
+            {
+                radarCountdown -= 1 * Time.deltaTime; //start countdown
+                //if ((int)radarCountdown != 0)
+                    //show enemies on map
+                //else
+                //{
+                //    //perk ended, reset back to default
+                //    //stop showing enemies on the map
+                //    radarCounter = false;
+                //    radarCountdown = perkResetTimer;
+                //    radarEffect.SetActive(false);
+                //}
+            }
 
             RotateView();
             // the jump state needs to read here to make sure it is not missed
@@ -304,6 +454,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
                     }
                 }
             }
+            elapsedTime += Time.deltaTime;
 
             float percentageComplete = Time.time / 1f;
             Vector3 temp = clip.transform.position; //temp holder 
@@ -337,7 +488,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             }
 
             // Update the time
-            elapsedTime += Time.deltaTime;
+            
 
             //check if player is alive or dead
             if (health <= 0)
@@ -373,24 +524,119 @@ namespace UnityStandardAssets.Characters.FirstPerson
             }
         }
 
+        /*
+        *When obtained perk compare against list to update GUI element
+        *@String s: name passed from onTriggerEnter with orb
+        */
+        public void getPerk(String s)
+        {
+            for (int i = 0; i < listOfPerks.Count; i++) {
+                if (s.Equals(listOfPerks[i].name))
+                {
+                    addPerkGUI(listOfPerks[i]);
+                    assignNext = false;
+                }
+            }
+        }
+
         /* 
         * When perk effect added to player, adds it to the next available spot on the HUD
         * to show the player what perk they have
         * @Sprite s: sprite effect obtained by the player
         */
-        private void addPerk(Sprite s)
+        private void addPerkGUI(Sprite s)
         {
+            //loop through images to find next available image
             for (int i = 0; i < perksAvailableImg.Length; i++)
             {
                 //Add perk image to next available image slot
                 if (!perksAvailableImg[i].enabled == true && assignNext == false)
                 {
-                    perksAvailableImg[i].enabled = true;
                     perksAvailableImg[i].overrideSprite = s;
+                    perksAvailableImg[i].enabled = true;
                     assignNext = true;
+                    currentPerks.Add(s.name);
                 }
             }
         }
+
+        //When player uses their perk
+        public void usePerk()
+        {
+            //Grab first perk in the list
+            switch (currentPerks[0])
+            {
+                case "Rejuv":
+                    rejuvenationEffect.SetActive(true);
+                    UpdatePerkList();
+                    rejuvCounter = true;
+                    break;
+                case "Nimble":
+                    nimbleEffect.SetActive(true);
+                    UpdatePerkList();
+                    nimbleCounter = true;
+                    break;
+                case "rapid":
+                    rapidFireEffect.SetActive(true);
+                    UpdatePerkList();
+                    rapidCounter = true;
+                    break;
+                case "radar":
+                    radarEffect.SetActive(true);
+                    UpdatePerkList();
+                    radarCounter = true;
+                    break;
+                case "shield":
+                    shieldEffect.SetActive(true);
+                    UpdatePerkList();
+                    shieldCounter = true;
+                    break;
+                default:
+                    Debug.Log(currentPerks[0]);
+                    break;
+                
+            }
+        }
+
+        //Removes perk just used and updates list, calls method to update GUI
+        private void UpdatePerkList() {
+            //Remove the perk after using it
+            currentPerks.RemoveAt(0);
+            //Update the list
+            for (int i = 0; i < currentPerks.Count; i++) {
+                if(currentPerks[i] == null)
+                {
+                    currentPerks.Insert(i, currentPerks[i+1]);
+                    currentPerks.RemoveAt(i+1);   
+                } 
+            }
+            UpdatePerkGUI();
+        }
+
+        //Updates the GUI perk elements on the screen
+        private void UpdatePerkGUI()
+        {
+            //Reset images on screen
+            for (int i = 0; i < perksAvailableImg.Length; i++)
+            {
+                perksAvailableImg[i].enabled = false;
+            }
+
+            //Update images on screen from current list
+            for (int j = 0; j < currentPerks.Count; j++)
+            {
+                for (int k = 0; k < listOfPerks.Count; k++)
+                {
+                    if (currentPerks[j].Equals(listOfPerks[k].name))
+                    {
+                        Sprite s = listOfPerks[k];
+                        perksAvailableImg[j].overrideSprite = s;
+                        perksAvailableImg[j].enabled = true;
+                    }
+                }
+            }
+        }
+
 
         //When time limit reaches 0 the game will end
         public void gameOver()
@@ -414,8 +660,12 @@ namespace UnityStandardAssets.Characters.FirstPerson
         //Passed from the bullet script to inflict damage on the player
         public void takeDamage(int damage)
         {
-            damaged = true;
-            health -= damage;
+            //shield is not active then allow damage to come to the player
+            if (!invincible)
+            {
+                damaged = true;
+                health -= damage;
+            }
         }
 
 
@@ -663,5 +913,59 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 alphaFadeValue = 0;
             }
         }
+
+        //Opens pause menu when player hits ESC
+        public void openPauseMenu()
+        {
+            pauseMenu.enabled = true;
+        }
+
+        //Load the main menu
+        public void exitToMainMenu()
+        {
+            StartCoroutine(LoadScreen("MainMenu"));
+        }
+
+        //return back to the game - resume selected on pause menu
+        public void backToGame() {
+            pauseMenu.enabled = false;
+        }
+
+        //return back to pause menu - no selected on quit menu
+        public void returnToPause()
+        {
+            quitOptions.enabled = false;
+            pauseMenu.enabled = true;
+        }
+
+        //Open quit menu to confirm exit
+        public void confirmExit()
+        {
+            pauseMenu.enabled = false;
+            quitOptions.enabled = true;
+        }
+
+        //show loading screen while menu loads in the backgrund
+        IEnumerator LoadScreen(string level)
+        {
+            //Get random load screen and tip
+            int Loadindex = Random.Range(0, loadingScreen.Length);
+            int tipIndex = Random.Range(0, tips.Length);
+            //show loading screen and tip
+            loadingScreen[Loadindex].enabled = true;
+            tips[tipIndex].enabled = true;
+            progressBackground.enabled = true;
+            progressFill.enabled = true;
+            //Load mainmenu in background while loading screen is shown
+            async = SceneManager.LoadSceneAsync(level);
+            //Progress bar while level is being loaded
+            while (!async.isDone)
+            {
+                //Update progress bar
+                progressBar.value = (int)(async.progress * 100);
+                yield return null;
+            }
+        }
+
     }
 }
