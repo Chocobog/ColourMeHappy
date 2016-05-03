@@ -16,7 +16,7 @@ public class Bullet : MonoBehaviour
 	
 	public float speed = 200.0f;
 	public float lifeTime = 3.0f;
-	public int damage = 50;
+	public int damage = 25;
     public string bulletOrigin;
     public Transform PaintPrefab;
 
@@ -53,7 +53,10 @@ public class Bullet : MonoBehaviour
                 //apply damage to object
                GameObject obj = hit.collider.gameObject;
                 if (obj.tag == "Player" || obj.tag == "Enemy" || obj.tag == "Ally")
+                {
                     obj.SendMessage("takeDamage", damage);
+                    obj.SendMessage("defeatedBy", bulletOrigin);
+                }
             }
         }
         else

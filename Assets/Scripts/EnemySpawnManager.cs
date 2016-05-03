@@ -21,9 +21,8 @@ public class EnemySpawnManager : MonoBehaviour {
     //flag spawn
     private GameObject[] enemyFlag;
     public GameObject redFlag;
-    public GameObject redFlagMist; // 
+    public GameObject redFlagMist;
     public Transform flagSpawn;
-    public Transform flagMistSpawn; //
 
 
 	// Use this for initialization

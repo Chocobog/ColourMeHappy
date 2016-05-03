@@ -37,6 +37,8 @@ public class SimpleFSM : MonoBehaviour
 	public float attackRange = 20.0f;
 	public float attackRangeStop = 10.0f;
 
+    private float dist;
+
 
     private NavMeshAgent nav;
     public int waypointLocation = 0;
@@ -66,116 +68,122 @@ public class SimpleFSM : MonoBehaviour
 
     // Update each frame
     void Update() {
-        switch (curState) {
-            case FSMState.Patrol: UpdatePatrolState(); break;
-            case FSMState.Chase: UpdateChaseState(); break;
-            case FSMState.Attack: UpdateAttackState(); break;
-            case FSMState.Dead: UpdateDeadState(); break;
-        }
+        nav.SetDestination(waypointList[waypointLocation].transform.position);
 
         // Update the time
         elapsedTime += Time.deltaTime;
 
         // Go to dead state if no health left
         if (health <= 0)
-            curState = FSMState.Dead;
+            health = 0; //do something
+
 
         Animator animator = GetComponent<Animator>();
         //animator for walking on the ground
-        animator.SetBool("grounded", true);
+        //animator.Play("idle");
+        animator.Play("idle pose with a gun");
+
+        if (Vector3.Distance(transform.position, playerTransform.position) <= chaseRange)
+        {
+            nav.SetDestination(GameObject.FindGameObjectWithTag("Player").transform.position);
+        }
+
+        dist = Vector3.Distance(transform.position, playerTransform.position);
+        if (dist <= attackRange)
+        {
+            ShootBullet();
+        }
     }
 
 	/*
      * Patrol state
      */
-    protected void UpdatePatrolState() {
+ //   protected void UpdatePatrolState() {
 
-        //move to next waypoint
-        if (Vector3.Distance(nav.transform.position, waypointList[waypointLocation].transform.position) <= 2.0f)
-        {
-            waypointLocation++;
-            //loop back
-            if (waypointLocation >= waypointList.Length)
-                waypointLocation = 0;
-            nav.SetDestination(waypointList[waypointLocation].transform.position);
-        }
-        //move to first waypoint or resume going to waypoint
-        else 
-        {
-            nav.SetDestination(waypointList[waypointLocation].transform.position);
-        }
+ //       //move to next waypoint
+ //       if (Vector3.Distance(nav.transform.position, waypointList[waypointLocation].transform.position) <= 2.0f)
+ //       {
+ //           waypointLocation++;
+ //           //loop back
+ //           if (waypointLocation >= waypointList.Length)
+ //               waypointLocation = 0;
+ //           nav.SetDestination(waypointList[waypointLocation].transform.position);
+ //       }
+ //       //move to first waypoint or resume going to waypoint
+ //       else 
+ //       {
+            
+ //       }
 
-		// Transitions
-        // Check the distance
-        // When the distance is near, transition to chase state
-        if (Vector3.Distance(transform.position, playerTransform.position) <= chaseRange) {
-            curState = FSMState.Chase;
-        }
-    }
+	//	// Transitions
+ //       // Check the distance
+ //       // When the distance is near, transition to chase state
+        
+ //   }
 
 
-    /*
-     * Chase state
-	 */
-    protected void UpdateChaseState() {
+ //   /*
+ //    * Chase state
+	// */
+ //   protected void UpdateChaseState() {
 
-        // NavMeshAgent move code goes here
-        nav.SetDestination(GameObject.FindGameObjectWithTag("Player").transform.position);
+ //       // NavMeshAgent move code goes here
+        
 
-		// Transitions
-        // Check the distance with player tank
-        // When the distance is near, transition to attack state
-		float dist = Vector3.Distance(transform.position, playerTransform.position);
-		if (dist <= attackRange) {
-            curState = FSMState.Attack;
-        }
-        // Go back to patrol is it become too far
-        else if (dist >= chaseRange) {
-            curState = FSMState.Patrol;
-		}
+	//	// Transitions
+ //       // Check the distance with player tank
+ //       // When the distance is near, transition to attack state
+	//	float dist = Vector3.Distance(transform.position, playerTransform.position);
+	//	if (dist <= attackRange) {
+ //           curState = FSMState.Attack;
+ //       }
+ //       // Go back to patrol is it become too far
+ //       else if (dist >= chaseRange) {
+ //           curState = FSMState.Patrol;
+	//	}
 		
-	}
+	//}
 	
 
-	/*
-	 * Attack state
-	 */
-    protected void UpdateAttackState() {
+	///*
+	// * Attack state
+	// */
+ //   protected void UpdateAttackState() {
 
-		// Transitions
-		// Check the distance with the player tank
-        float dist = Vector3.Distance(transform.position, playerTransform.position);
-		if (dist > attackRange) {
-            nav.Resume();
-			curState = FSMState.Chase;
-		}
-        // Transition to patrol if the tank is too far
-        else if (dist >= chaseRange) {
-            nav.Resume();
-			curState = FSMState.Patrol;
-		}
+	//	// Transitions
+	//	// Check the distance with the player tank
+ //       float dist = Vector3.Distance(transform.position, playerTransform.position);
+	//	if (dist > attackRange) {
+ //           nav.Resume();
+	//		curState = FSMState.Chase;
+	//	}
+ //       // Transition to patrol if the tank is too far
+ //       else if (dist >= chaseRange) {
+ //           nav.Resume();
+	//		curState = FSMState.Patrol;
+	//	}
 
-        if (dist <= attackRangeStop)
-        {
-            nav.Stop();
-        }
+ //       if (dist <= attackRangeStop)
+ //       {
+ //           nav.Stop();
+ //       }
 
-        // Shoot the bullets
-        ShootBullet();
-    }
+ //       // Shoot the bullets
+ //       ShootBullet();
+ //   }
 
 
-    /*
-     * Dead state
-     */
-    protected void UpdateDeadState() {
-        // Show the dead animation with some physics effects
-        if (!bDead) {
-            bDead = true;
-            nav.Stop();
-            nav.enabled = false;
-        }
-    }
+ //   /*
+ //    * Dead state
+ //    */
+ //   protected void UpdateDeadState() {
+ //       // Show the dead animation with some physics effects
+ //       if (!bDead) {
+ //           bDead = true;
+ //           nav.Stop();
+ //           nav.enabled = false;
+ //       }
+ //   }
 
 
     /*

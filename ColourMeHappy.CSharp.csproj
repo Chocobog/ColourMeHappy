@@ -58,12 +58,6 @@
     <Reference Include="UnityEngine.Networking">
       <HintPath>Library\UnityAssemblies\UnityEngine.Networking.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.Networking">
-      <HintPath>Library\UnityAssemblies\UnityEngine.Networking.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UI">
-      <HintPath>Library\UnityAssemblies\UnityEngine.UI.dll</HintPath>
-    </Reference>
     <Reference Include="UnityEditor">
       <HintPath>Library\UnityAssemblies\UnityEditor.dll</HintPath>
     </Reference>
@@ -100,23 +94,19 @@
     <Compile Include="Assets\Scripts\EnemySpawnManager.cs" />
     <Compile Include="Assets\Scripts\GameManager.cs" />
     <Compile Include="Assets\Scripts\Gradient.cs" />
+    <Compile Include="Assets\Scripts\MiscSpawner.cs" />
     <Compile Include="Assets\Scripts\MusicController.cs" />
+    <Compile Include="Assets\Scripts\Orb.cs" />
     <Compile Include="Assets\Scripts\PerkGuardNodePoint.cs" />
     <Compile Include="Assets\Scripts\SimpleFSM.cs" />
     <Compile Include="Assets\Scripts\healthPickup.cs" />
     <Compile Include="Assets\Scripts\menuScript.cs" />
-    <Compile Include="Assets\Scripts\minimapShadows.cs" />
     <Compile Include="Assets\_MK\_MKGlowSystem\_Demo\Code\MK_DemoControl.cs" />
     <Compile Include="Assets\_MK\_MKGlowSystem\_Demo\Code\MK_RotateObject.cs" />
     <Compile Include="Assets\_MK\_MKGlowSystem\_Internal\MKGlow.cs" />
     <Compile Include="Assets\_MK\_MKGlowSystem\_Internal\MKGlowSystemHelpWindow.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Assets\Characters\Monster\shaders\bumpSpecmap.shader" />
-    <None Include="Assets\Characters\Monster\shaders\caveShader.shader" />
-    <None Include="Assets\Characters\Monster\shaders\metalA.shader" />
-    <None Include="Assets\Characters\Monster\shaders\monsterShader.shader" />
-    <None Include="Assets\Characters\Monster\shaders\vertexAnim.shader" />
     <None Include="Assets\Flag\Shaders\FlagCulling.shader" />
     <None Include="Assets\Fonts\hammerhead2\readme.txt" />
     <None Include="Assets\Rocks and Boulders 2\Shaders\Blend SM2.shader" />

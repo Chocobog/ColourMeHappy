@@ -1,24 +1,22 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
+using UnityStandardAssets.Characters.FirstPerson;
 
-public class EnemyNPC : MonoBehaviour {
-
-    public enum FSMState
-    {
-        None,
-        Patrol,
-        Chase,
-        Attack,
-        Dead,
-    }
-
-    // Current state that the NPC is reaching
-    public FSMState curState;
-
-    //waypoints
+/*
+* Written by: Joshua Hurn
+* Last Modified: 02/05/2016
+*
+* This class controls the enemy NPC and their behaviour in the environment
+*
+*/
+public class EnemyNPC : MonoBehaviour
+{
+    //Enemy/Ally Flag
     public GameObject[] waypointList;
 
-    protected Transform playerTransform;// Player Transform
+    protected GameObject playerTransform;// Player Transform
+    protected GameObject[] PlayerAllies; //Player Allies Transform
 
     // Bullet
     public GameObject bullet;
@@ -29,167 +27,145 @@ public class EnemyNPC : MonoBehaviour {
     protected float elapsedTime;
 
     // Whether the NPC is destroyed or not
-    protected bool bDead;
     public int health = 100;
 
     // Ranges for chase and attack
-    public float chaseRange = 35.0f;
-    public float attackRange = 20.0f;
+    public float chaseRange;
+    public float attackRange;
     public float attackRangeStop = 10.0f;
 
+    //flag capture
+    public Transform flag;
+    public Transform flagMist;
+    public Transform flagHolder;
+    public string opposingFlag;
+    public string allyFlag;
 
+    //animation
+    Animator animator;
+
+    //Player HUD update
+    public string allyFlagLocation;
+    public Text allyFlagLocationTxt;
+
+    public int scoreEnemy; //score of enemy team
+    public Text scoreEnemyTxt;
+
+    public string defeater;
     private NavMeshAgent nav;
-    public int waypointLocation = 0;
 
-    /*
-     * Initialize the Finite state machine for the NPC tank
-     */
+    //player score update
+    private int scoreUpdate;
+
+    //Initialisation
     void Start()
     {
-
-        curState = FSMState.Patrol;
-
-        bDead = false;
         elapsedTime = 0.0f;
 
-        // Get the target enemy(Player)
-        GameObject objPlayer = GameObject.FindGameObjectWithTag("Player");
-        playerTransform = objPlayer.transform;
+        chaseRange = 100f;
+        attackRange = 65f;
+
+        allyFlagLocation = "At Base - ";
+        opposingFlag = "BlueFlag";
+        allyFlag = "RedFlag";
+
+        // Target enemies
+        playerTransform = GameObject.FindGameObjectWithTag("Player");
+        //PlayerAllies = GameObject.FindGameObjectsWithTag("Allies");
+
+        scoreUpdate = 10;
 
         //Get the tanks nav mesh
         nav = GetComponent<NavMeshAgent>();
+        nav.SetDestination(waypointList[0].transform.position);
 
-        if (!playerTransform)
-            print("Player doesn't exist.. Please add one with Tag named 'Player'");
-
+        animator = GetComponent<Animator>();
     }
-
 
     // Update each frame
     void Update()
     {
-        switch (curState)
-        {
-            case FSMState.Patrol: UpdatePatrolState(); break;
-            case FSMState.Chase: UpdateChaseState(); break;
-            case FSMState.Attack: UpdateAttackState(); break;
-            case FSMState.Dead: UpdateDeadState(); break;
-        }
+        //update location of flag
+        allyFlagLocationTxt.text = allyFlagLocation;
+        scoreEnemyTxt.text = scoreEnemy.ToString();
 
         // Update the time
         elapsedTime += Time.deltaTime;
 
+        
         // Go to dead state if no health left
         if (health <= 0)
-            curState = FSMState.Dead;
-
-        //Animator animator = GetComponent<Animator>();
-        //animator for walking on the ground
-        //animator.SetBool("walk", true);
-        Animation animation = GetComponent<Animation>();
-        animation.CrossFade("run");
-    }
-
-    /*
-     * Patrol state
-     */
-    protected void UpdatePatrolState()
-    {
-
-        //move to next waypoint
-        if (Vector3.Distance(nav.transform.position, waypointList[waypointLocation].transform.position) <= 1.0f)
         {
-            waypointLocation++;
-            //loop back
-            if (waypointLocation >= waypointList.Length)
-                waypointLocation = 0;
-            nav.SetDestination(waypointList[waypointLocation].transform.position);
+            //Only plays this animation once
+            animator.Play("dead");
+            health = 0;
+            nav.Stop();
+            //if player shot last bullet to kill enemy
+            if (defeater.Equals(playerTransform.tag))
+            {
+                FirstPersonController player = playerTransform.GetComponent<FirstPersonController>();
+                player.playerScore += scoreUpdate;
+            }
+            
+
+            //teleporter effect
+            //transform position back to base
+            //timer for 10 seconds then nav.Resume
+
         }
-        //move to first waypoint or resume going to waypoint
+        
         else
         {
-            nav.SetDestination(waypointList[waypointLocation].transform.position);
-        }
+            //If the player comes into the chase distance but not in attack range
+            if (Vector3.Distance(transform.position, playerTransform.transform.position) <= chaseRange && Vector3.Distance(transform.position, playerTransform.transform.position) > attackRange)
+            {
+                animator.Play("idle pose with a gun");
+                nav.SetDestination(GameObject.FindGameObjectWithTag("Player").transform.position);
+            }
+            else if (Vector3.Distance(transform.position, playerTransform.transform.position) > chaseRange)
+            {
+                //animator for walking on the ground
+                animator.Play("idle");
+            }
 
-
-        // Transitions
-        // Check the distance with player tank
-        // When the distance is near, transition to chase state
-        if (Vector3.Distance(transform.position, playerTransform.position) <= chaseRange)
-        {
-            curState = FSMState.Chase;
+            //if the player comes into the attack distance
+            if (Vector3.Distance(transform.position, playerTransform.transform.position) <= attackRange)
+            {
+                ShootBullet();
+                
+            }
         }
     }
 
-
-    /*
-     * Chase state
-	 */
-    protected void UpdateChaseState()
+    public void OnTriggerEnter(Collider c)
     {
-
-        // NavMeshAgent move code goes here
-        nav.SetDestination(GameObject.FindGameObjectWithTag("Player").transform.position);
-
-        // Transitions
-        // Check the distance with player tank
-        // When the distance is near, transition to attack state
-        float dist = Vector3.Distance(transform.position, playerTransform.position);
-        if (dist <= attackRange)
+        //if this is not the enemies team flag then take the flag
+        if (c.gameObject.tag == "BlueFlag")
         {
-            curState = FSMState.Attack;
-        }
-        // Go back to patrol is it become too far
-        else if (dist >= chaseRange)
-        {
-            curState = FSMState.Patrol;
-        }
+            Debug.Log("Found opposing flag");
+            //Add flag to player 
+            flag = c.transform;
+            flag.transform.parent = transform;
+            flag.transform.position = flagHolder.transform.position;
+            //update location of flag
+            allyFlagLocation = "Taken - ";
 
-    }
+            //Add mist to player
+            flagMist = c.transform;
+            flagMist.transform.parent = transform;
+            flagMist.transform.position = flagHolder.transform.position;
 
-
-    /*
-	 * Attack state
-	 */
-    protected void UpdateAttackState()
-    {
-
-        // Transitions
-        // Check the distance with the player tank
-        float dist = Vector3.Distance(transform.position, playerTransform.position);
-        if (dist > attackRange)
-        {
-            nav.Resume();
-            curState = FSMState.Chase;
-        }
-        // Transition to patrol if the tank is too far
-        else if (dist >= chaseRange)
-        {
-            nav.Resume();
-            curState = FSMState.Patrol;
+            nav.SetDestination(waypointList[1].transform.position);
         }
 
-        if (dist <= attackRangeStop)
+        //if enemy returns to flag with opposing team flag
+        if (c.gameObject.tag == allyFlag && flag != null)
         {
-            nav.Stop();
-        }
-
-        // Shoot the bullets
-        ShootBullet();
-    }
-
-
-    /*
-     * Dead state
-     */
-    protected void UpdateDeadState()
-    {
-        // Show the dead animation with some physics effects
-        if (!bDead)
-        {
-            bDead = true;
-            nav.Stop();
-            nav.enabled = false;
+            //Destroy the flag gameObject
+            Destroy(flag.gameObject);
+            scoreEnemy++;
+            //update location of flag
+            allyFlagLocation = "At Base -";
         }
     }
 
@@ -203,17 +179,26 @@ public class EnemyNPC : MonoBehaviour {
         {
             if ((bulletSpawnPoint) & (bullet))
             {
-                // Shoot the bullet
-                Instantiate(bullet, bulletSpawnPoint.transform.position, bulletSpawnPoint.transform.rotation);
+                animator.Play("shot"); //animation for shooting
+                Instantiate(bullet, bulletSpawnPoint.transform.position, bulletSpawnPoint.transform.rotation); // Shoot the bullet
             }
             elapsedTime = 0.0f;
         }
     }
 
     // Apply Damage if hit by bullet
-    public void ApplyDamage(int damage)
+    public void takeDamage(int damage)
     {
         health -= damage;
+    }
+
+    /*
+    * Used to find out who shot the final bullet to kill the enemy
+    * @string s: Origin of the bullet that was shot
+    */
+    public void defeatedBy(string s)
+    {
+        defeater = s;
     }
 
 
@@ -225,4 +210,5 @@ public class EnemyNPC : MonoBehaviour {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, attackRange);
     }
+
 }

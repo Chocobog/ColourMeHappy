@@ -107,11 +107,6 @@
     <Compile Include="Assets\_MK\_MKGlowSystem\_Internal\Editor\MKGlowEditor.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Assets\Characters\Monster\shaders\bumpSpecmap.shader" />
-    <None Include="Assets\Characters\Monster\shaders\caveShader.shader" />
-    <None Include="Assets\Characters\Monster\shaders\metalA.shader" />
-    <None Include="Assets\Characters\Monster\shaders\monsterShader.shader" />
-    <None Include="Assets\Characters\Monster\shaders\vertexAnim.shader" />
     <None Include="Assets\Flag\Shaders\FlagCulling.shader" />
     <None Include="Assets\Fonts\hammerhead2\readme.txt" />
     <None Include="Assets\Rocks and Boulders 2\Shaders\Blend SM2.shader" />

@@ -7,6 +7,7 @@ using UnityEngine.UI;
 using UnityStandardAssets.CrossPlatformInput;
 using UnityStandardAssets.Utility;
 using Random = UnityEngine.Random;
+using UnityEngine.EventSystems;
 
 /*
 * @Written by: Unity
@@ -41,7 +42,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         [SerializeField] private AudioClip m_JumpSound;           // the sound played when character leaves the ground.
         [SerializeField] private AudioClip m_LandSound;           // the sound played when character touches back on ground.
         public bool canMove; // if the player can move or not
-
+        
         private Camera m_Camera;
         private bool m_Jump;
         private float m_YRotation;
@@ -81,8 +82,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public int scoreAlly; //score of ally team
         public int scoreEnemy; //score of enemy team
         public int scoreLimit = 3;
+        public int playerScore;
         public GameObject[] perksAvailable; //perks player can activate
-        public string allyFlagLocation = "At Base - "; //location of ally flag
         public string enemyFlagLocation = "At Base - "; //location of enemy flag
 
         //Perk images
@@ -102,6 +103,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public GameObject rejuvenationEffect;
         public GameObject rapidFireEffect;
         public GameObject radarEffect;
+        public GameObject respawnEffect;
 
         public bool invincible = false; //Says if the player can take damage or not
 
@@ -128,12 +130,12 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public Text gameTimeLeftTxt;
         public Text playerAmmoTxt;
         public Text scoreAllyTxt;
-        public Text scoreEnemyTxt;
         public Text perksAvailableTxt;
         public Image[] perksAvailableImg;
         public Image damageImage;
-        public Text allyFlagLocationTxt;
         public Text enemyFlagLocationTxt;
+        public InputField inputField;
+        public Text inputFieldText;
 
         //Flag Capture
         public Transform flag;
@@ -222,12 +224,13 @@ namespace UnityStandardAssets.Characters.FirstPerson
             rapidCountdown = perkResetTimer;
 
             /////TESTING////////
-            addPerkGUI(Rejuv);
+            //addPerkGUI(Rejuv);
         }
 
         // Update is called once per frame
         private void Update()
         {
+            Debug.Log(playerScore);
             //set game time presentation
             int minutes = Mathf.FloorToInt(gameTimeLeft / 60F);
             int seconds = Mathf.FloorToInt(gameTimeLeft - minutes * 60);
@@ -240,8 +243,6 @@ namespace UnityStandardAssets.Characters.FirstPerson
             gameTimeLeftTxt.text = "Time left: " + displayTime;
             playerAmmoTxt.text = playerClip.ToString() + " / " + playerTotalAmmo.ToString();
             scoreAllyTxt.text = scoreAlly.ToString();
-            scoreEnemyTxt.text = scoreEnemy.ToString();
-            allyFlagLocationTxt.text = allyFlagLocation;
             enemyFlagLocationTxt.text = enemyFlagLocation;
 
             gameTimeLeft -= Time.deltaTime;
@@ -271,9 +272,17 @@ namespace UnityStandardAssets.Characters.FirstPerson
             if (Input.GetKeyDown(KeyCode.Escape))
                 openPauseMenu();
 
-            //Use your perk
-            if (Input.GetKeyDown(KeyCode.C))
+            //Use your perk when C is pressed
+            if (Input.GetKeyDown(KeyCode.C) && currentPerks.Count != 0)
                 usePerk();
+
+            //Open cheat code window when enter pressed
+            if (Input.GetKeyDown(KeyCode.Return))
+            {
+                inputField.gameObject.SetActive(true);
+                inputField.ActivateInputField(); //set focus to input field
+                canMove = false; //stop moving while entering code
+            }   
 
             //enter overtime due to draw
             if (isOvertime)
@@ -499,28 +508,24 @@ namespace UnityStandardAssets.Characters.FirstPerson
             if (respawn)
             {
                 canMove = false;
+                respawnEffect.SetActive(true); //effect for respawning
                 //move player back to 1st spawn position
-                //if (transform.position != spawnPositions[0].position)
-                   //move player back to spawn location
-                //GameObject.FindGameObjectWithTag("Player").GetComponent<FirstPersonController>().enabled = false;
+                if (transform.position != spawnPositions[0].position)
+                    transform.position = spawnPositions[0].position;
                 respawnCountdown -= 1 * Time.deltaTime; //start counter
                 textTime = string.Format("{0:0}", respawnCountdown); //Show respawn message
                 respawnInfo.text = "Respawn in " + textTime;
                 respawnInfo.pixelOffset = new Vector2(0, 180); // ensure text is centred on screen
                 respawnInfo.enabled = true;
-                Debug.Log(textTime);
-                Debug.Log(respawnInfo.enabled);
                 //if respawn time is up respawn player
                 if (textTime.Equals("0"))
                 {
-                    if (transform.position != spawnPositions[0].position)
-                        transform.position = spawnPositions[0].position;
-                    canMove = true;
-                    //GameObject.FindGameObjectWithTag("Player").GetComponent<FirstPersonController>().enabled = true;
+                    canMove = true; //allow movement
                     health = 100;
-                    respawnCountdown = 10.0f;
-                    respawnInfo.enabled = false;
-                }
+                    respawnCountdown = 10.0f; //reset
+                    respawnInfo.enabled = false; //turn off GUI element
+                    respawnEffect.SetActive(false); //effect for respawning
+                }                    
             }
         }
 
@@ -637,7 +642,6 @@ namespace UnityStandardAssets.Characters.FirstPerson
             }
         }
 
-
         //When time limit reaches 0 the game will end
         public void gameOver()
         {
@@ -676,44 +680,49 @@ namespace UnityStandardAssets.Characters.FirstPerson
             m_NextStep = m_StepCycle + .5f;
         }
 
+        //Currently empty method as scores are not given to the enemy
+        public void defeatedBy(string s) {}
 
         private void FixedUpdate()
         {
-            float speed;
-            GetInput(out speed);
-            // always move along the camera forward as it is the direction that it being aimed at
-            Vector3 desiredMove = transform.forward*m_Input.y + transform.right*m_Input.x;
-
-            // get a normal for the surface that is being touched to move along it
-            RaycastHit hitInfo;
-            Physics.SphereCast(transform.position, m_CharacterController.radius, Vector3.down, out hitInfo,
-                               m_CharacterController.height/2f);
-            desiredMove = Vector3.ProjectOnPlane(desiredMove, hitInfo.normal).normalized;
-
-            m_MoveDir.x = desiredMove.x*speed;
-            m_MoveDir.z = desiredMove.z*speed;
-
-
-            if (m_CharacterController.isGrounded)
+            if (canMove)
             {
-                m_MoveDir.y = -m_StickToGroundForce;
+                float speed;
+                GetInput(out speed);
+                // always move along the camera forward as it is the direction that it being aimed at
+                Vector3 desiredMove = transform.forward * m_Input.y + transform.right * m_Input.x;
 
-                if (m_Jump)
+                // get a normal for the surface that is being touched to move along it
+                RaycastHit hitInfo;
+                Physics.SphereCast(transform.position, m_CharacterController.radius, Vector3.down, out hitInfo,
+                                   m_CharacterController.height / 2f);
+                desiredMove = Vector3.ProjectOnPlane(desiredMove, hitInfo.normal).normalized;
+
+                m_MoveDir.x = desiredMove.x * speed;
+                m_MoveDir.z = desiredMove.z * speed;
+
+
+                if (m_CharacterController.isGrounded)
                 {
-                    m_MoveDir.y = m_JumpSpeed;
-                    PlayJumpSound();
-                    m_Jump = false;
-                    m_Jumping = true;
-                }
-            }
-            else
-            {
-                m_MoveDir += Physics.gravity*m_GravityMultiplier*Time.fixedDeltaTime;
-            }
-            m_CollisionFlags = m_CharacterController.Move(m_MoveDir*Time.fixedDeltaTime);
+                    m_MoveDir.y = -m_StickToGroundForce;
 
-            ProgressStepCycle(speed);
-            UpdateCameraPosition(speed);
+                    if (m_Jump)
+                    {
+                        m_MoveDir.y = m_JumpSpeed;
+                        PlayJumpSound();
+                        m_Jump = false;
+                        m_Jumping = true;
+                    }
+                }
+                else
+                {
+                    m_MoveDir += Physics.gravity * m_GravityMultiplier * Time.fixedDeltaTime;
+                }
+                m_CollisionFlags = m_CharacterController.Move(m_MoveDir * Time.fixedDeltaTime);
+
+                ProgressStepCycle(speed);
+                UpdateCameraPosition(speed);
+            }
         }
 
 
@@ -859,6 +868,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 
                 
             }
+
             //if player returns to flag with enemy flag
             if (c.gameObject.tag == allyFlag && flag != null)
             {
@@ -943,6 +953,20 @@ namespace UnityStandardAssets.Characters.FirstPerson
         {
             pauseMenu.enabled = false;
             quitOptions.enabled = true;
+        }
+
+        /*
+        * This function gets a string from the player input field and compares it to some set string.
+        * These strings are cheat codes and are used souly for testing purposes.
+        * @String s: string that is passed from the input field
+        */
+        public void cheatCodes(string s)
+        {
+            string code = inputFieldText.text;
+            canMove = true; //after done entering cheat allow player to move again
+            inputField.gameObject.SetActive(false);
+            if (code.Equals("Score"))
+                playerScore = 1000;
         }
 
         //show loading screen while menu loads in the backgrund
