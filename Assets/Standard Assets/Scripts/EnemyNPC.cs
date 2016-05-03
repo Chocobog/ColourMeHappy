@@ -47,7 +47,6 @@ public class EnemyNPC : MonoBehaviour
     //Player HUD update
     public string allyFlagLocation;
     public Text allyFlagLocationTxt;
-
     public int scoreEnemy; //score of enemy team
     public Text scoreEnemyTxt;
 
@@ -56,6 +55,11 @@ public class EnemyNPC : MonoBehaviour
 
     //player score update
     private int scoreUpdate;
+
+    //For radar effect - FPS script
+    public GameObject marker;
+    public bool showMarker;
+    private float radarCountdown;
 
     //Initialisation
     void Start()
@@ -71,8 +75,9 @@ public class EnemyNPC : MonoBehaviour
 
         // Target enemies
         playerTransform = GameObject.FindGameObjectWithTag("Player");
-        //PlayerAllies = GameObject.FindGameObjectsWithTag("Allies");
+        PlayerAllies = GameObject.FindGameObjectsWithTag("Ally");
 
+        showMarker = false;
         scoreUpdate = 10;
 
         //Get the tanks nav mesh
@@ -91,7 +96,6 @@ public class EnemyNPC : MonoBehaviour
 
         // Update the time
         elapsedTime += Time.deltaTime;
-
         
         // Go to dead state if no health left
         if (health <= 0)
@@ -100,7 +104,8 @@ public class EnemyNPC : MonoBehaviour
             animator.Play("dead");
             health = 0;
             nav.Stop();
-            //if player shot last bullet to kill enemy
+
+            //if player shot last bullet to kill enemy update score
             if (defeater.Equals(playerTransform.tag))
             {
                 FirstPersonController player = playerTransform.GetComponent<FirstPersonController>();
@@ -137,6 +142,7 @@ public class EnemyNPC : MonoBehaviour
         }
     }
 
+    //Collisions with the enemy
     public void OnTriggerEnter(Collider c)
     {
         //if this is not the enemies team flag then take the flag
@@ -201,7 +207,27 @@ public class EnemyNPC : MonoBehaviour
         defeater = s;
     }
 
+    /*
+    * Activates the enemy marker for the player to see
+    * @bool b: Passed from the FPS script when radar effect triggered
+    */
+    public void markerActivate(bool b)
+    {
+        showMarker = b;
+        marker.SetActive(showMarker);
+    }
 
+    /*
+    * Deactivates the enemy marker for the player
+    * @bool b: Passed from the FPS script when radar effect ends
+    */
+    public void markerDeactivate(bool b)
+    {
+        showMarker = b;
+        marker.SetActive(showMarker);
+    }
+
+    //Drawn elements on the screen
     void OnDrawGizmos()
     {
         Gizmos.color = Color.yellow;

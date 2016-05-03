@@ -7,8 +7,6 @@ using UnityEngine.UI;
 using UnityStandardAssets.CrossPlatformInput;
 using UnityStandardAssets.Utility;
 using Random = UnityEngine.Random;
-using UnityEngine.EventSystems;
-
 /*
 * @Written by: Unity
 * @Modified by: Joshua Hurn, Jake Nye
@@ -102,7 +100,6 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public GameObject nimbleEffect;
         public GameObject rejuvenationEffect;
         public GameObject rapidFireEffect;
-        public GameObject radarEffect;
         public GameObject respawnEffect;
 
         public bool invincible = false; //Says if the player can take damage or not
@@ -224,13 +221,12 @@ namespace UnityStandardAssets.Characters.FirstPerson
             rapidCountdown = perkResetTimer;
 
             /////TESTING////////
-            //addPerkGUI(Rejuv);
+            addPerkGUI(radar);
         }
 
         // Update is called once per frame
         private void Update()
         {
-            Debug.Log(playerScore);
             //set game time presentation
             int minutes = Mathf.FloorToInt(gameTimeLeft / 60F);
             int seconds = Mathf.FloorToInt(gameTimeLeft - minutes * 60);
@@ -386,20 +382,33 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
             }
 
-            //radar activated
+            //radar shows enemies on the minimap
             if (radarCounter)
             {
                 radarCountdown -= 1 * Time.deltaTime; //start countdown
-                //if ((int)radarCountdown != 0)
-                    //show enemies on map
-                //else
-                //{
-                //    //perk ended, reset back to default
-                //    //stop showing enemies on the map
-                //    radarCounter = false;
-                //    radarCountdown = perkResetTimer;
-                //    radarEffect.SetActive(false);
-                //}
+                if ((int)radarCountdown != 0)
+                {
+                    //Instantiated here incase enemy is respawned. This will then show location of that new enemy
+                    GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+                    //filter through and activate all enemy markers
+                    for(int i = 0; i < enemies.Length; i++)
+                    {
+                        enemies[i].SendMessage("markerActivate", true);
+                    }
+                }
+                else
+                {
+                    //Perk ended, reset back to default
+                    radarCounter = false;
+                    radarCountdown = perkResetTimer;
+                    //Instantiated here incase enemy is respawned. This will then show location of that new enemy
+                    GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+                    //filter through and deactivate all enemy markers
+                    for (int i = 0; i < enemies.Length; i++)
+                    {
+                        enemies[i].SendMessage("markerDeactivate", false);
+                    }
+                }
             }
 
             RotateView();
@@ -587,7 +596,6 @@ namespace UnityStandardAssets.Characters.FirstPerson
                     rapidCounter = true;
                     break;
                 case "radar":
-                    radarEffect.SetActive(true);
                     UpdatePerkList();
                     radarCounter = true;
                     break;
