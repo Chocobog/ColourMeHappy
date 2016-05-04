@@ -21,7 +21,7 @@ public class MenuUpgrades : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-	
+        loadScore();
 	}
 	
 	// Update is called once per frame
@@ -44,7 +44,7 @@ public class MenuUpgrades : MonoBehaviour {
         }
     }
 
-    public void saveScore()
+    public void savePlayerData()
     {
         BinaryFormatter bf = new BinaryFormatter();
         FileStream file = File.Create(Application.persistentDataPath + "/playerScore.dat"); //save to this location

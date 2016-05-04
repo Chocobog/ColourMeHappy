@@ -63,7 +63,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public GameObject bulletSpawnPoint; // spawn location for player
 
         //Bullet shooting rate
-        public float shootRate = 0.5f;
+        public float shootRate = 0.8f;
         protected float elapsedTime;
 
         //Spawning after death
@@ -208,6 +208,9 @@ namespace UnityStandardAssets.Characters.FirstPerson
             unloading = false;
             reloading = false;
 
+            //how fast player can run
+            m_RunSpeed = 35;
+
             //Set flags
             opposingFlag = "RedFlag";
             allyFlag = "BlueFlag";
@@ -227,7 +230,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             rapidCountdown = perkResetTimer;
 
             //Set player score
-            loadScore();
+            loadPlayerData();
 
             /////TESTING////////
             addPerkGUI(radar);
@@ -1003,8 +1006,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
             file.Close();
         }
 
-        // loads the score of the player from previous games
-        public void loadScore()
+        // loads the player data of the player from previous games
+        public void loadPlayerData()
         {
             if(File.Exists(Application.persistentDataPath + "/playerScore.dat"))
             {
@@ -1014,6 +1017,12 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 PlayerData data = (PlayerData)bf.Deserialize(file);
                 file.Close();
 
+                //load values
+                health += data.playerHealthMod;
+                m_RunSpeed += data.playerMoveSpeedMod;
+                delay -= data.playerReloadSpeedMod;
+                shootRate -= data.playerFireRateMod;
+                playerTotalAmmo += data.playerStartingAmmoMod;
                 playerScore = data.finalScore;
             }
             else
