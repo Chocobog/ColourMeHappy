@@ -1051,11 +1051,4 @@ namespace UnityStandardAssets.Characters.FirstPerson
         }
 
     }
-
-    //Class that saves the final score of the player and loads the score from previous games.
-    [Serializable]
-    class PlayerData
-    {
-        public int finalScore;
-    }
 }
