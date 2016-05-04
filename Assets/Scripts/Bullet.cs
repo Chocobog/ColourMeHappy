@@ -18,7 +18,6 @@ public class Bullet : MonoBehaviour
 	public float lifeTime = 3.0f;
 	public int damage = 25;
     public string bulletOrigin;
-    public Transform PaintPrefab;
 
 
 
@@ -27,7 +26,8 @@ public class Bullet : MonoBehaviour
 	void Start()
 	{
 		Destroy(gameObject, lifeTime);
-	}
+        damage = 25;
+    }
 
 
     void Update()
@@ -47,12 +47,14 @@ public class Bullet : MonoBehaviour
                 //push forward on the object so that it doesn't cause visual issues
                 hit.point = hit.point + hit.normal * 0.2f;
                 if (Explosion)
+                {
                     Instantiate(Explosion, hit.point, Quaternion.FromToRotation(Vector3.forward, hit.normal));
-                Destroy(gameObject);
+                    Destroy(gameObject);
+                }
 
                 //apply damage to object
                GameObject obj = hit.collider.gameObject;
-                if (obj.tag == "Player" || obj.tag == "Enemy" || obj.tag == "Ally")
+                if (obj.tag == "Player" || obj.tag == "Enemy" || obj.tag == "Ally" || obj.tag == "perkGuard")
                 {
                     obj.SendMessage("takeDamage", damage);
                     obj.SendMessage("defeatedBy", bulletOrigin);

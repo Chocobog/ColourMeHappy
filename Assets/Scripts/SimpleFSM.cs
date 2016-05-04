@@ -3,9 +3,11 @@ using System.Collections;
 
 /*
  * Written by: AJ Abotomey
- * Modified by: Jake Nye on the 03/05/2016
- * Comments: This script handles all of the npc Finite State Machine state transitions throughout
- *           ColourMeHappy's game.
+ * Modified by: Jake Nye 
+ * Last Modified: 03/05/2016
+ * 
+ * This class handles all of the npc Finite State Machine state transitions throughout
+ * ColourMeHappy's game.
 */
 
 public class SimpleFSM : MonoBehaviour 
@@ -108,14 +110,6 @@ public class SimpleFSM : MonoBehaviour
         // Go to dead state if no health left
         if (health <= 0)
             curState = FSMState.Dead;
-
-        //Animator animator = GetComponent<Animator>();
-        //animator for walking on the ground
-        //animator.SetBool("grounded", true);
-
-        //Animation animator = GetComponent<Animation>();
-        //animator.Play("loop_walk_funny");
-
     }
 
 
@@ -130,9 +124,6 @@ public class SimpleFSM : MonoBehaviour
         if (Vector3.Distance(nav.transform.position, waypointList[waypointLocation].transform.position) <= 2.0f)
         {
             waypointLocation++;
-            // rotate to destination position
-            //Quaternion targetRot = Quaternion.LookRotation(destPos - transform.position);
-            //GetComponent<Rigidbody>().MoveRotation(Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * rotSpeed));
 
             //loop back
             if (waypointLocation >= waypointList.Length)
@@ -147,49 +138,20 @@ public class SimpleFSM : MonoBehaviour
             nav.SetDestination(waypointList[waypointLocation].transform.position);
         }
 
-        
-
-		// Transitions
         // Check the distance
         // When the distance is near, transition to chase state
         if (Vector3.Distance(transform.position, playerTransform.position) <= chaseRange) {
             curState = FSMState.Chase;
         }
     }
-
-    //GameObject robot; // necessary to access this for future changes to the robot models animation state changes
     /*
      * Chase state
 	 */
     protected void UpdateChaseState() {
-
-        // NavMeshAgent move code goes here
+        //Move to player
         nav.SetDestination(GameObject.FindGameObjectWithTag("Player").transform.position);
 
-        float dist = Vector3.Distance(transform.position, playerTransform.position);
-        //if ((dist <= chaseRange) & (dist > attackRangeStop))
-        //{
-        //    nav.Stop();
-        //    Vector3 ownPos = new Vector3(transform.position.x, 0.0f, playerTransform.position.z);
-        //    Vector3 playerPos = new Vector3(playerTransform.position.x, 0.0f, playerTransform.position.z);
-
-        //    GetComponent<Rigidbody>().MoveRotation(Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(playerPos - ownPos), rotSpeed * Time.deltaTime));
-
-        //    GetComponent<Rigidbody>().MovePosition(transform.position + transform.forward * (Time.deltaTime * chaseSpeed));
-
-        //    GameObject pGuard = GameObject.FindGameObjectWithTag("perkGuard");
-        //    Quaternion guardRotate = Quaternion.LookRotation(playerPos - transform.position);
-        //    pGuard.transform.rotation = Quaternion.Slerp(pGuard.transform.rotation, guardRotate, Time.deltaTime * rotSpeed);
-
-        //}
-        //else {
-        //    nav.Resume();
-        //}
-
-		// Transitions
-        // Check the distance with player tank
-        // When the distance is near, transition to attack state
-		
+        float dist = Vector3.Distance(transform.position, playerTransform.position);		
 		if (dist <= attackRange) {
             curState = FSMState.Attack;
         }
@@ -197,9 +159,7 @@ public class SimpleFSM : MonoBehaviour
         else if (dist >= chaseRange) {
             curState = FSMState.Patrol;
 		}
-		
 	}
-
 
     /*
 	 * Attack state
@@ -207,41 +167,24 @@ public class SimpleFSM : MonoBehaviour
     //public GameObject perkGuard;
     protected void UpdateAttackState() {
         float dist = Vector3.Distance(transform.position, playerTransform.position);
-
-        GameObject pGuard = GameObject.FindGameObjectWithTag("perkGuard");
         Quaternion guardRotate = Quaternion.LookRotation(playerTransform.position - transform.position);
-        pGuard.transform.rotation = Quaternion.Slerp(pGuard.transform.rotation, guardRotate, Time.deltaTime * rotSpeed);
-        
-        
+        transform.rotation = Quaternion.Slerp(transform.rotation, guardRotate, Time.deltaTime * rotSpeed);
+
         // stop to attack the player
         if (dist <= attackRangeStop) {
-            // whilst attacking chase the player
-            //nav.Stop();
-            //nav.SetDestination(GameObject.FindGameObjectWithTag("Player").transform.position);
-
             // Shoot the bullets
-            ShootBullet();
-                    //nav.Stop();
-            
+            ShootBullet();            
         }
-
-        // Transitions
         // Check the distance with the player tank
         if (dist > attackRange)
-        {
-            //nav.Stop();
             curState = FSMState.Chase;
-
-        }
         // Transition to patrol if the tank is too far
         else if (dist > chaseRange)
         {
             nav.Resume();
             curState = FSMState.Patrol;
         }
-       
     }
-
 
     /*
      * Dead state
@@ -262,15 +205,15 @@ public class SimpleFSM : MonoBehaviour
     private void ShootBullet() {
         if (elapsedTime >= shootRate) {
 			if ((bulletSpawnPoint) & (bullet)) {
-            	// Shoot the bullet
-            	Instantiate(bullet, bulletSpawnPoint.transform.position, bulletSpawnPoint.transform.rotation);
-			}
+                GameObject spawnOrigin = (GameObject)Instantiate(bullet, bulletSpawnPoint.transform.position, bulletSpawnPoint.transform.rotation);
+                spawnOrigin.SendMessage("spawnOrigin", gameObject); //send message to the bullet to say who shot this bullet
+            }
             elapsedTime = 0.0f;
         }
     }
 
     // Apply Damage if hit by bullet
-    public void ApplyDamage(int damage ) {
+    public void takeDamage(int damage ) {
     	health -= damage;
     }
 

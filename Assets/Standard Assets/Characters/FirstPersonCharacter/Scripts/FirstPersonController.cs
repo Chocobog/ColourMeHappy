@@ -85,7 +85,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public int scoreLimit = 3;
         public int playerScore;
         public GameObject[] perksAvailable; //perks player can activate
-        public string enemyFlagLocation = "At Base - "; //location of enemy flag
+        public string enemyFlagLocation; //location of enemy flag
+        public string allyFlagLocation;
 
         //Perk images
         public Sprite Nimble;
@@ -130,6 +131,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public Text gameTimeLeftTxt;
         public Text playerAmmoTxt;
         public Text scoreAllyTxt;
+        public Text scoreEnemyTxt;
         public Text perksAvailableTxt;
         public Image[] perksAvailableImg;
         public Image damageImage;
@@ -137,6 +139,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public InputField inputField;
         public Text inputFieldText;
         public Text playerScoreTxt;
+        public Text allyFlagLocationTxt;
 
         //Flag Capture
         public Transform flag;
@@ -215,6 +218,9 @@ namespace UnityStandardAssets.Characters.FirstPerson
             opposingFlag = "RedFlag";
             allyFlag = "BlueFlag";
 
+            allyFlagLocation = "At Base - ";
+            enemyFlagLocation = "At Base - ";
+
             //Update perks that can be used in game
             listOfPerks.Add(Nimble);
             listOfPerks.Add(Rejuv);
@@ -251,8 +257,10 @@ namespace UnityStandardAssets.Characters.FirstPerson
             gameTimeLeftTxt.text = "Time left: " + displayTime;
             playerAmmoTxt.text = playerClip.ToString() + " / " + playerTotalAmmo.ToString();
             scoreAllyTxt.text = scoreAlly.ToString();
+            allyFlagLocationTxt.text = allyFlagLocation;
             enemyFlagLocationTxt.text = enemyFlagLocation;
             playerScoreTxt.text = "Score: " + playerScore.ToString();
+            scoreEnemyTxt.text = scoreEnemy.ToString();
 
             gameTimeLeft -= Time.deltaTime;
             //when time is up or if score limit is reached end the game

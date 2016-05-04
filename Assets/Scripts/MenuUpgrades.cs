@@ -36,7 +36,7 @@ public class MenuUpgrades : MonoBehaviour {
             BinaryFormatter bf = new BinaryFormatter();
             FileStream file = File.Open(Application.persistentDataPath + "/playerScore.dat", FileMode.Open); //open from this location
 
-            PlayerData data = (PlayerData)bf.Deserialize(file);
+            PlayerData data = (PlayerData)bf.Deserialize(file); //instantiate player data
 
             //load score for menu upgrades
             menuScore = data.finalScore;
@@ -49,7 +49,7 @@ public class MenuUpgrades : MonoBehaviour {
         BinaryFormatter bf = new BinaryFormatter();
         FileStream file = File.Create(Application.persistentDataPath + "/playerScore.dat"); //save to this location
 
-        PlayerData data = new PlayerData();
+        PlayerData data = new PlayerData(); //instantiate player data
 
         //save values to player data for the player
         data.finalScore = menuScore;

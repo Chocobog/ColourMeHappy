@@ -28,7 +28,7 @@ public class AllySpawnManager : MonoBehaviour {
     // Use this for initialization
     void Start () {
         //spawn allies 
-        InvokeRepeating("spawn", 0, 0.1f);
+       // InvokeRepeating("spawn", 0, 0.1f);
 	}
 	
     //Spawns alies and controls when, where and how many are spawned in the game
