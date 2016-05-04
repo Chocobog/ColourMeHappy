@@ -42,7 +42,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
         [SerializeField] private AudioClip m_JumpSound;           // the sound played when character leaves the ground.
         [SerializeField] private AudioClip m_LandSound;           // the sound played when character touches back on ground.
         public bool canMove; // if the player can move or not
-        
+        public bool cameraMove; //if camera can move or not
+
         private Camera m_Camera;
         private bool m_Jump;
         private float m_YRotation;
@@ -203,6 +204,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             respawn = false;
             respawnInfo.enabled = false;
             canMove = true;
+            cameraMove = true;
             unloading = false;
             reloading = false;
 
@@ -511,10 +513,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
                     reloading = false;
                     delay = delayReset;
                 }
-            }
-
-            // Update the time
-            
+            }            
 
             //check if player is alive or dead
             if (health <= 0)
@@ -797,7 +796,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             {
                 m_Camera.transform.localPosition =
                     m_HeadBob.DoHeadBob(m_CharacterController.velocity.magnitude +
-                                      (speed*(m_IsWalking ? 1f : m_RunstepLenghten)));
+                                        (speed * (m_IsWalking ? 1f : m_RunstepLenghten)));
                 newCameraPosition = m_Camera.transform.localPosition;
                 newCameraPosition.y = m_Camera.transform.localPosition.y - m_JumpBob.Offset();
             }
@@ -845,7 +844,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         private void RotateView()
         {
-            m_MouseLook.LookRotation (transform, m_Camera.transform);
+            if(cameraMove)
+                m_MouseLook.LookRotation (transform, m_Camera.transform);
         }
 
 
@@ -941,10 +941,12 @@ namespace UnityStandardAssets.Characters.FirstPerson
             }
         }
 
-        //Opens pause menu when player hits ESC
+        //Opens pause menu when player hits ESC and stops the player from moving
         public void openPauseMenu()
         {
             pauseMenu.enabled = true;
+            cameraMove = false;
+            canMove = false;
         }
 
         //Load the main menu
@@ -956,6 +958,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
         //return back to the game - resume selected on pause menu
         public void backToGame() {
             pauseMenu.enabled = false;
+            cameraMove = true;
+            canMove = true;
         }
 
         //return back to pause menu - no selected on quit menu
@@ -1047,11 +1051,11 @@ namespace UnityStandardAssets.Characters.FirstPerson
         }
 
     }
+
+    //Class that saves the final score of the player and loads the score from previous games.
     [Serializable]
     class PlayerData
     {
         public int finalScore;
     }
 }
-
-

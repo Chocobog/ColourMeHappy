@@ -50,7 +50,17 @@ public class EnemyNPC : MonoBehaviour
     public int scoreEnemy; //score of enemy team
     public Text scoreEnemyTxt;
 
+    //who defeated this enemy
     public string defeater;
+    public bool invulnerable;
+
+    //respawning
+    public float respawnCountdown;
+    public float respawnReset = 10f;
+    public GameObject respawnEffect;
+    public Transform[] enemySpawnPositions = new Transform[6];
+
+    //navmesh agent (enemy)
     private NavMeshAgent nav;
 
     //player score update
@@ -85,6 +95,9 @@ public class EnemyNPC : MonoBehaviour
         nav.SetDestination(waypointList[0].transform.position);
 
         animator = GetComponent<Animator>();
+
+        invulnerable = false;
+        respawnCountdown = respawnReset; // set respawn timer
     }
 
     // Update each frame
@@ -100,23 +113,35 @@ public class EnemyNPC : MonoBehaviour
         // Go to dead state if no health left
         if (health <= 0)
         {
+            respawnCountdown -= 1 * Time.deltaTime; //start counter
             //Only plays this animation once
             animator.Play("dead");
-            health = 0;
+            respawnEffect.SetActive(true); //respawn effect
             nav.Stop();
-
+            invulnerable = true;
             //if player shot last bullet to kill enemy update score
-            if (defeater.Equals(playerTransform.tag))
+            if (defeater.Equals(playerTransform.tag) && !invulnerable)
             {
                 FirstPersonController player = playerTransform.GetComponent<FirstPersonController>();
                 player.playerScore += scoreUpdate;
+            }
+            //take back to enemy base spawn position, chosen time of 3 second offset to show player visual effect
+            if (transform.position != enemySpawnPositions[0].position && (int)respawnCountdown == (int)respawnReset - 3)
+                transform.position = enemySpawnPositions[0].position;
+            //respawn over - set back to default
+            if ((int)respawnCountdown == 0)
+            {
+                nav.Resume();
+                health = 100;
+                invulnerable = false;
+                respawnCountdown = 10f;
+                respawnEffect.SetActive(false);
             }
             
 
             //teleporter effect
             //transform position back to base
             //timer for 10 seconds then nav.Resume
-
         }
         
         else
