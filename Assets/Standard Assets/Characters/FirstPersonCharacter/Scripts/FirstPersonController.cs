@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -133,6 +135,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public Text enemyFlagLocationTxt;
         public InputField inputField;
         public Text inputFieldText;
+        public Text playerScoreTxt;
 
         //Flag Capture
         public Transform flag;
@@ -203,6 +206,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             unloading = false;
             reloading = false;
 
+            //Set flags
             opposingFlag = "RedFlag";
             allyFlag = "BlueFlag";
 
@@ -219,6 +223,9 @@ namespace UnityStandardAssets.Characters.FirstPerson
             shieldCountdown = perkResetTimer;
             radarCountdown = perkResetTimer;
             rapidCountdown = perkResetTimer;
+
+            //Set player score
+            loadScore();
 
             /////TESTING////////
             addPerkGUI(radar);
@@ -240,6 +247,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             playerAmmoTxt.text = playerClip.ToString() + " / " + playerTotalAmmo.ToString();
             scoreAllyTxt.text = scoreAlly.ToString();
             enemyFlagLocationTxt.text = enemyFlagLocation;
+            playerScoreTxt.text = "Score: " + playerScore.ToString();
 
             gameTimeLeft -= Time.deltaTime;
             //when time is up or if score limit is reached end the game
@@ -653,6 +661,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         //When time limit reaches 0 the game will end
         public void gameOver()
         {
+            saveScore();
             overtimeCountdown = 0;
             //disable player input
             //disable enemy input
@@ -688,7 +697,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             m_NextStep = m_StepCycle + .5f;
         }
 
-        //Currently empty method as scores are not given to the enemy
+        //Currently empty method as scores are not given to the enemy, here for game expansion
         public void defeatedBy(string s) {}
 
         private void FixedUpdate()
@@ -977,6 +986,44 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 playerScore = 1000;
         }
 
+        //Saves the score of the player after the game is closed
+        public void saveScore()
+        {
+            BinaryFormatter bf = new BinaryFormatter();
+            FileStream file = File.Create(Application.persistentDataPath + "/playerScore.dat"); //save to this location
+
+            PlayerData data = new PlayerData();
+            data.finalScore = playerScore;
+
+            bf.Serialize(file, data);
+            file.Close();
+        }
+
+        // loads the score of the player from previous games
+        public void loadScore()
+        {
+            if(File.Exists(Application.persistentDataPath + "/playerScore.dat"))
+            {
+                BinaryFormatter bf = new BinaryFormatter();
+                FileStream file = File.Open(Application.persistentDataPath + "/playerScore.dat", FileMode.Open); //open from this location
+
+                PlayerData data = (PlayerData)bf.Deserialize(file);
+                file.Close();
+
+                playerScore = data.finalScore;
+            }
+            else
+            {
+                playerScore = 0;
+            }
+        }
+
+        //Developers method, used only when wanting to reset the score of the person, may be used for expansion in the game later on
+        public void deleteScore()
+        {
+            File.Delete(Application.persistentDataPath + "/playerScore.dat"); //delete from this location
+        }
+
         //show loading screen while menu loads in the backgrund
         IEnumerator LoadScreen(string level)
         {
@@ -1000,4 +1047,11 @@ namespace UnityStandardAssets.Characters.FirstPerson
         }
 
     }
+    [Serializable]
+    class PlayerData
+    {
+        public int finalScore;
+    }
 }
+
+
