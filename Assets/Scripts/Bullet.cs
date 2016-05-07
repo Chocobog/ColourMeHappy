@@ -11,25 +11,21 @@ using System.Collections;
 */
 public class Bullet : MonoBehaviour
 {
-	//Explosion Effect
-	public GameObject Explosion;
+	public GameObject Explosion; //Splash Effect
+    public float speed = 200.0f; //speed of bullet
+	public float lifeTime = 3.0f; //lifetime of bullet
+	public int damage = 25; //damage from bullet
+    public string bulletOrigin; //Global storage of where the bullet came from
+    private Vector3 newPos; //position of the bullet
 	
-	public float speed = 200.0f;
-	public float lifeTime = 3.0f;
-	public int damage = 25;
-    public string bulletOrigin;
-
-
-
-    private Vector3 newPos;
-	
+    //Initialisation
 	void Start()
 	{
 		Destroy(gameObject, lifeTime);
         damage = 25;
     }
 
-
+    //Updated every frame
     void Update()
 	{
 		// future position if bullet doesn't hit any colliders
@@ -62,15 +58,15 @@ public class Bullet : MonoBehaviour
             }
         }
         else
-        {
-            // didn't hit - move to newPos
-            transform.position = newPos;
-        }
+            transform.position = newPos; // didn't hit - move to newPos
     }
 
+    /*
+    * Returns who the bullet belongs to (who shot the bullet)
+    * @Gameobject g: Gameobject of who shot the bullet
+    */
     void spawnOrigin(GameObject g)
     {
         bulletOrigin = g.tag;
-        Debug.Log(bulletOrigin);
     }
 }

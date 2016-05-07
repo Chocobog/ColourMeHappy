@@ -10,7 +10,7 @@ using UnityStandardAssets.Characters.FirstPerson;
 * This class controls the enemy NPC and their behaviour in the environment
 * Enemy NPC logic is a rule based system
 */
-public class EnemyNPC : MonoBehaviour
+public class AllyNPC : MonoBehaviour
 {
     //Enemy/Ally Flag
     protected GameObject playerTransform;// Player Transform
@@ -33,10 +33,6 @@ public class EnemyNPC : MonoBehaviour
     public float chaseRange;
     public float attackRange;
     public float attackRangeStop = 10.0f;
-
-    public float lineOfSightAngle = 50f;
-    private SphereCollider col; // Reference to the sphere collider trigger
-    private BoxCollider box; //Reference to the box collider trigger
 
     //flag capture
     public Transform flag;
@@ -90,9 +86,6 @@ public class EnemyNPC : MonoBehaviour
     //Initialisation
     void Start()
     {
-        col = GetComponent<SphereCollider>();
-        box = GetComponent<BoxCollider>();
-
         opposingFlag = "BlueFlag";
         allyFlag = "RedFlag";
         atBase = "At Base - ";
@@ -170,22 +163,22 @@ public class EnemyNPC : MonoBehaviour
             //Enemy is alive
             foreach (GameObject ally in PlayerAllies)
             {
-                //////if the players ally comes into the chase distance
-                //if (Vector3.Distance(transform.position, ally.transform.position) <= chaseRange && Vector3.Distance(transform.position, ally.transform.position) > attackRange)
-                //{
-                //    Debug.Log("1");
-                //    animator.Play("idle pose with a gun");
-                //    nav.SetDestination(GameObject.FindGameObjectWithTag("Ally").transform.position);
-                //}
-                ////If the player comes into the chase distance but not in attack range
-                //else if (Vector3.Distance(transform.position, playerTransform.transform.position) <= chaseRange && Vector3.Distance(transform.position, playerTransform.transform.position) > attackRange)
-                //{
-                //    Debug.Log("2");
-                //    animator.Play("idle pose with a gun");
-                //    nav.SetDestination(GameObject.FindGameObjectWithTag("Player").transform.position);
-                //}
+                //if the players ally comes into the chase distance
+                if (Vector3.Distance(transform.position, ally.transform.position) <= chaseRange && Vector3.Distance(transform.position, ally.transform.position) > attackRange)
+                {
+                    Debug.Log("1");
+                    animator.Play("idle pose with a gun");
+                    nav.SetDestination(GameObject.FindGameObjectWithTag("Ally").transform.position);
+                }
+                //If the player comes into the chase distance but not in attack range
+                else if (Vector3.Distance(transform.position, playerTransform.transform.position) <= chaseRange && Vector3.Distance(transform.position, playerTransform.transform.position) > attackRange)
+                {
+                    Debug.Log("2");
+                    animator.Play("idle pose with a gun");
+                    nav.SetDestination(GameObject.FindGameObjectWithTag("Player").transform.position);
+                }
                 //if no allies or player is within distance 
-                if (Vector3.Distance(transform.position, playerTransform.transform.position) > chaseRange && Vector3.Distance(transform.position, ally.transform.position) > chaseRange)
+                else if (Vector3.Distance(transform.position, playerTransform.transform.position) > chaseRange && Vector3.Distance(transform.position, ally.transform.position) > chaseRange)
                 {
                     
                     animator.Play("idle");
@@ -265,11 +258,11 @@ public class EnemyNPC : MonoBehaviour
         }
     }
 
-    //Triggers with the enemy
+    //Collisions with the enemy
     public void OnTriggerEnter(Collider c)
     {
-        //if this is not the enemies team flag then take the flag if hit by enemy box collider
-        if (c.transform.tag == opposingFlag )
+        //if this is not the enemies team flag then take the flag
+        if (c.transform.tag == opposingFlag)
         {
             allyFlagLocation = taken;
             fp.allyFlagLocation = taken;
@@ -287,7 +280,7 @@ public class EnemyNPC : MonoBehaviour
             }
         }
 
-        //if enemy returns to flag with opposing team flag if hit by enemy box collider
+        //if enemy returns to flag with opposing team flag
         if (c.transform.tag == allyFlag && flag != null)
         {
             FC = false;
@@ -302,35 +295,6 @@ public class EnemyNPC : MonoBehaviour
                 friends.SendMessage("flagTaken", isEnemyFlagCarrier);
             }
         }
-    }
-
-    //When anything stays within enemy radius
-    public void OnTriggerStay(Collider c)
-    {
-        //if player within enemy radius
-        if (c.gameObject == playerTransform)
-        {
-            Vector3 direction = c.transform.position - transform.position; //direction of player
-            float angle = Vector3.Angle(direction, transform.forward); //angle from the direction
-
-            if (angle < lineOfSightAngle * 0.5f)
-            {
-                RaycastHit hit;
-                if (Physics.Raycast(transform.position + transform.up, direction, out hit, 200))
-                {
-                    //if raycast hits the player and nothing else in front of the player
-                    if (hit.collider.gameObject == playerTransform)
-                    {
-                        Debug.Log("Tested worked I have found you");
-                        animator.Play("idle pose with a gun"); //animation
-                        nav.SetDestination(GameObject.FindGameObjectWithTag("Player").transform.position);
-                        enemyEncountered(playerTransform);
-                    }
-                }
-            }
-
-        }
-        return;
     }
 
     // lets the other enemies know if the flag has been taken or not and gives random number for AI decision
@@ -350,7 +314,7 @@ public class EnemyNPC : MonoBehaviour
             if ((bulletSpawnPoint) & (bullet))
             {
                 
-                GameObject spawnOrigin = (GameObject)Instantiate(bullet, transform.position, transform.rotation);
+                GameObject spawnOrigin = (GameObject)Instantiate(bullet, bulletSpawnPoint.transform.position, bulletSpawnPoint.transform.rotation);
                 spawnOrigin.SendMessage("spawnOrigin", gameObject); //send message to the bullet to say who shot this bullet
                 animator.Play("shot"); //animation for shooting
             }
@@ -364,17 +328,22 @@ public class EnemyNPC : MonoBehaviour
     */
     private void enemyEncountered(GameObject p)
     {
-        //rotate enemy towards ally
-        Quaternion enemyRotate = Quaternion.LookRotation(p.transform.position - transform.position);
-        transform.rotation = Quaternion.Slerp(transform.rotation, enemyRotate, Time.deltaTime * rotSpeed);
-
         currentDistance = (transform.position - p.transform.position).magnitude; //distance between enemy and ally
-        //strafe along y axis
+        //strafe along y axis if your going back from the player and moving out of attack range, else strafe along x axis
         if (currentDistance > lastDistance)
         {
             nav.SetDestination(transform.position + new Vector3(0.0f, 5.0f, 0.0f));
             lastDistance = currentDistance; //update last distance
         }
+        else if (currentDistance <= lastDistance)
+        {
+            nav.SetDestination(transform.position + new Vector3(5.0f, 0.0f, 0.0f));
+            lastDistance = currentDistance; //update last distance
+        }
+            
+        //rotate enemy towards ally
+        Quaternion enemyRotate = Quaternion.LookRotation(p.transform.position - transform.position);
+        transform.rotation = Quaternion.Slerp(transform.rotation, enemyRotate, Time.deltaTime * rotSpeed);
         ShootBullet();
     }
 
@@ -423,20 +392,17 @@ public class EnemyNPC : MonoBehaviour
         float minDist = Mathf.Infinity;
         Vector3 currentPos = transform.position;
         float playerDist = Vector3.Distance(playerTransform.transform.position, currentPos); //player distance
-        foreach (GameObject playerAlly in g)
+        foreach (GameObject closest in g)
         {
-            AllyNPC anpc = playerAlly.GetComponent<AllyNPC>();
-            float dist = Vector3.Distance(playerAlly.transform.position, currentPos); // ally distance
+            float dist = Vector3.Distance(closest.transform.position, currentPos); // ally distance
             //if player distance or ally of player distance is closer then last found one
-            if (anpc.health > 0)//if player allies health is above 0 then add player to search
+            
+            if (dist < minDist)
             {
-                if (dist < minDist)
-                {
-                    minDist = dist;
-                    tMin = playerAlly.transform;
-                }
+                minDist = dist;
+                tMin = closest.transform;
             }
-            //if players health is above 0 then add player to search
+            //if players health is above 0 then add player to find
             if (fp.health > 0)
             {
                 if (playerDist < minDist)
@@ -453,9 +419,9 @@ public class EnemyNPC : MonoBehaviour
     void OnDrawGizmos()
     {
         Gizmos.color = Color.yellow;
-        //Gizmos.DrawWireSphere(transform.position, Vector3.Angle(direction, transform.forward));
+        Gizmos.DrawWireSphere(transform.position, chaseRange);
 
         Gizmos.color = Color.red;
-        //Gizmos.DrawLine(transform.position, direction);
+        Gizmos.DrawWireSphere(transform.position, attackRange);
     }
 }

@@ -880,7 +880,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public void OnTriggerEnter(Collider c)
         {
             //if this is not the players team flag then take the flag
-            if (c.gameObject.tag == opposingFlag)
+            if (c.transform.tag == opposingFlag)
             {
                 //Add flag to player 
                 flag = c.transform;
@@ -888,17 +888,11 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 flag.transform.position = flagHolder.transform.position;
                 //update location of flag
                 enemyFlagLocation = "Taken - ";
-
-                //Add mist to player
-                flagMist = c.transform;
-                flagMist.transform.parent = transform;
-                flagMist.transform.position = flagHolder.transform.position;
-                
-                
+                c.enabled = false;
             }
 
             //if player returns to flag with enemy flag
-            if (c.gameObject.tag == allyFlag && flag != null)
+            if (c.transform.tag == allyFlag && flag != null)
             {
                 //Destroy the flag gameObject
                 Destroy(flag.gameObject);
