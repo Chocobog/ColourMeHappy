@@ -7,12 +7,14 @@
  *           positions at a specified speed.
 */
 
-var floatup;
+var floatup; //boolean to say if floating up or not
 
+//initialise here
 function Start() {
     floatup = false;
 }
 
+//Called each frame
 function Update() {
     if ( floatup )
         floatingup();
@@ -20,12 +22,14 @@ function Update() {
         floatingdown();
 }
 
+//Move the guard up in the y axis
 function floatingup() {
     transform.position.y += 1 * Time.deltaTime;
     yield WaitForSeconds(1);
     floatup = false;
 }
 
+//Move the guard down in the y axis
 function floatingdown() {
     transform.position.y -= 1 * Time.deltaTime;
     yield WaitForSeconds(1);

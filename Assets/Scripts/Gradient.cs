@@ -2,11 +2,20 @@
 using System.Collections.Generic;
 using UnityEngine.UI;
 
+/*
+* Written By: Koshik
+* http://answers.unity3d.com/questions/1086415/gradient-text-in-unity-522-basevertexeffect-is-obs.html
+* Last Modified: 23/10/2015
+*
+* This control the gradient effect on the main menu for Colour Me Happy text
+*/
+
 [AddComponentMenu("UI/Effects/Gradient")]
 public class Gradient : BaseMeshEffect
 {
     public Color32 topColor = Color.white;
     public Color32 bottomColor = Color.black;
+
 
     public override void ModifyMesh(VertexHelper helper)
     {

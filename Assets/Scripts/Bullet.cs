@@ -15,8 +15,8 @@ public class Bullet : MonoBehaviour
     public float speed = 200.0f; //speed of bullet
 	public float lifeTime = 3.0f; //lifetime of bullet
 	public int damage = 25; //damage from bullet
-    public string bulletOrigin; //Global storage of where the bullet came from
     private Vector3 newPos; //position of the bullet
+    public GameObject shooter; // who shot the bullet
 	
     //Initialisation
 	void Start()
@@ -36,7 +36,7 @@ public class Bullet : MonoBehaviour
         if (Physics.Linecast(transform.position, newPos, out hit))
         {
             //if the bullet hits the person who shot the bullet do nothing
-            if (hit.collider && hit.collider.gameObject.tag != bulletOrigin)
+            if (hit.collider && hit.collider.gameObject.tag != shooter.tag)
             {
                // create explosion and destroy bullet
                 transform.position = hit.point;
@@ -53,7 +53,7 @@ public class Bullet : MonoBehaviour
                 if (obj.tag == "Player" || obj.tag == "Enemy" || obj.tag == "Ally" || obj.tag == "perkGuard")
                 {
                     obj.SendMessage("takeDamage", damage);
-                    obj.SendMessage("defeatedBy", bulletOrigin);
+                    obj.SendMessage("defeatedBy", shooter);
                 }
             }
         }
@@ -67,6 +67,7 @@ public class Bullet : MonoBehaviour
     */
     void spawnOrigin(GameObject g)
     {
-        bulletOrigin = g.tag;
+        shooter = g;
     }
+
 }

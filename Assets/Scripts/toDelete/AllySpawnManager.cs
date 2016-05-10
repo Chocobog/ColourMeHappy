@@ -52,12 +52,6 @@ public class AllySpawnManager : MonoBehaviour {
     //Check to see if flag has been destroyed by other team
     void Update()
     {
-        allyFlag = GameObject.FindGameObjectsWithTag("BlueFlag");
-
-        //If no flag then create one
-        if (allyFlag.Length == 0)
-        {
-            Instantiate(blueFlag, flagSpawn.position, blueFlag.transform.rotation);
-        }
+        
     }
 }

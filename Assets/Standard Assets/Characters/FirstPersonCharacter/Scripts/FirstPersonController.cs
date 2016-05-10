@@ -70,10 +70,10 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public Transform[] spawnPositions = new Transform[6];
         private Boolean respawn;
 
-        public int totalHealth = 100;
+        public int totalHealth = 100; //total healh player can have
         public int health = 100; // player health
         public int pickupHealth = 10; //when health picked up
-        public bool damaged = false;
+        public bool damaged = false; //if player is damaged
         public float gameTimeLeft = 600; //10 minute time limit
 
         public int pickupAmmo = 5; //when ammo picked up
@@ -82,11 +82,11 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public int playerTotalAmmo = 50; //total ammo of player
         public int scoreAlly; //score of ally team
         public int scoreEnemy; //score of enemy team
-        public int scoreLimit = 3;
-        public int playerScore;
+        public int scoreLimit = 3; //total limit of flags to be captured
+        public int playerScore; //score of the player
         public GameObject[] perksAvailable; //perks player can activate
         public string enemyFlagLocation; //location of enemy flag
-        public string allyFlagLocation;
+        public string allyFlagLocation; //location of ally flag
 
         //Perk images
         public Sprite Nimble;
@@ -95,6 +95,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public Sprite shield;
         public Sprite radar;
         public bool assignNext;
+        public bool activeAssignNext;
 
         public List<Sprite> listOfPerks; //All perks in game
         public List<String> currentPerks; //Perks the player currently has
@@ -124,6 +125,11 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private bool rapidCounter = false;
         private bool radarCounter = false;
 
+        //Flags to make sure effect only applied once
+        private bool nimbleFlag = true;
+        private bool shieldFlag = true;
+        private bool rapidFlag = true;
+
         //HUD
         public Text healthTxt;
         public Slider healthSlider;
@@ -132,14 +138,22 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public Text playerAmmoTxt;
         public Text scoreAllyTxt;
         public Text scoreEnemyTxt;
-        public Text perksAvailableTxt;
         public Image[] perksAvailableImg;
+        public Image[] activerPerksImg;
         public Image damageImage;
         public Text enemyFlagLocationTxt;
         public InputField inputField;
         public Text inputFieldText;
         public Text playerScoreTxt;
         public Text allyFlagLocationTxt;
+        
+        //Text of flag status
+        public Text blueFlagTakenTxt;
+        public Text redFlagTakenTxt;
+        public Text blueFlagCapturedTxt;
+        public Text redFlagCapturedTxt;
+        public Text blueFlagRetrievedTxt;
+        public Text redFlagRetrievedTxt;
 
         //Flag Capture
         public Transform flag;
@@ -147,6 +161,23 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public Transform flagHolder;
         public string opposingFlag;
         public string allyFlag;
+
+        //blue&red flag status
+        public bool isBlueFlagTaken;
+        public bool isRedFlagTaken;
+        public bool isBlueFlagCaptured;
+        public bool isRedFlagCaptured;
+        public bool isBlueFlagRetrieved;
+        public bool isRedFlagRetrieved;
+
+        //time text is shown on screen with flag status
+        public float blueFlagTakenCountdown;
+        public float redFlagTakenCountdown;
+        public float blueFlagCapturedCountdown;
+        public float redFlagCapturedCountdown;
+        public float blueFlagRetrievedCountdown;
+        public float redFlagRetrievedCountdown;
+        public float flagCountdownReset = 3f;
 
         //damage effects
         public float flashSpeed = 5f;
@@ -178,9 +209,10 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public float delay = 1.5f;
         public string delayTextTime;
 
-        //exit game interface
+        //exit/end game interface
         public Canvas pauseMenu;
         public Canvas quitOptions;
+        public Canvas EndGame;
 
         //Loading screen on exit
         private AsyncOperation async;
@@ -189,6 +221,11 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public Slider progressBar;
         public Image progressBackground;
         public Image progressFill;
+
+        //Strings for referencing flag location
+        public string atBase;
+        public string taken;
+        public bool walkingSound = true;
 
         // Use this for initialization
         private void Start()
@@ -214,12 +251,32 @@ namespace UnityStandardAssets.Characters.FirstPerson
             //how fast player can run
             m_RunSpeed = 35;
 
-            //Set flags
+            //Set ally and enemy flag names
             opposingFlag = "RedFlag";
             allyFlag = "BlueFlag";
 
+            //Text saying where flags are
             allyFlagLocation = "At Base - ";
             enemyFlagLocation = "At Base - ";
+
+            atBase = "At Base - ";
+            taken = "Taken - ";
+
+            //init status of flags
+            isBlueFlagCaptured = false;
+            isRedFlagCaptured = false;
+            isBlueFlagTaken = false;
+            isRedFlagTaken = false;
+            isBlueFlagRetrieved = false;
+            isRedFlagRetrieved = false;
+
+            //init flag countdowns
+            blueFlagCapturedCountdown = flagCountdownReset;
+            blueFlagTakenCountdown = flagCountdownReset;
+            blueFlagRetrievedCountdown = flagCountdownReset;
+            redFlagCapturedCountdown = flagCountdownReset;
+            redFlagTakenCountdown = flagCountdownReset;
+            redFlagRetrievedCountdown = flagCountdownReset;
 
             //Update perks that can be used in game
             listOfPerks.Add(Nimble);
@@ -237,9 +294,6 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
             //Set player score
             loadPlayerData();
-
-            /////TESTING////////
-            addPerkGUI(radar);
         }
 
         // Update is called once per frame
@@ -320,7 +374,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             }
 
             //player is damaged from bullet
-            if (damaged) {
+            if (damaged && !invincible) {
                 damageImage.color = flashColour;
             } else
             {
@@ -328,19 +382,97 @@ namespace UnityStandardAssets.Characters.FirstPerson
             }
             damaged = false;
 
+            //Blue flag has been taken
+            if (isBlueFlagTaken)
+            {
+                blueFlagTakenCountdown -= 1 * Time.deltaTime;
+                blueFlagTakenTxt.enabled = true;
+                if ((int)blueFlagTakenCountdown == 0)
+                {
+                    blueFlagTakenTxt.enabled = false;
+                    blueFlagTakenCountdown = flagCountdownReset;
+                    isBlueFlagTaken = false;
+                }
+            }
+
+            //blue flag has been retrieved
+            if (isBlueFlagRetrieved)
+            {
+                blueFlagRetrievedCountdown -= 1 * Time.deltaTime;
+                blueFlagRetrievedTxt.enabled = true;
+                if ((int)blueFlagRetrievedCountdown == 0)
+                {
+                    blueFlagRetrievedTxt.enabled = false;
+                    blueFlagRetrievedCountdown = flagCountdownReset;
+                    isBlueFlagRetrieved = false;
+                }
+            }
+
+            //Blue flag has been captured
+            if (isBlueFlagCaptured)
+            {
+                blueFlagCapturedCountdown -= 1 * Time.deltaTime;
+                blueFlagCapturedTxt.enabled = true;
+                if ((int)blueFlagCapturedCountdown == 0)
+                {
+                    blueFlagCapturedTxt.enabled = false;
+                    blueFlagCapturedCountdown = flagCountdownReset;
+                    isBlueFlagCaptured = false;
+                }
+            }
+
+            //Red flag has been taken
+            if (isRedFlagTaken)
+            {
+                redFlagTakenCountdown -= 1 * Time.deltaTime;
+                redFlagTakenTxt.enabled = true;
+                if ((int)redFlagTakenCountdown == 0)
+                {
+                    redFlagTakenTxt.enabled = false;
+                    redFlagTakenCountdown = flagCountdownReset;
+                    isRedFlagTaken = false;
+                }
+            }
+
+            //Red flag has been retrieved
+            if (isRedFlagRetrieved)
+            {
+                redFlagRetrievedCountdown -= 1 * Time.deltaTime;
+                redFlagRetrievedTxt.enabled = true;
+                if ((int)redFlagRetrievedCountdown == 0)
+                {
+                    redFlagRetrievedTxt.enabled = false;
+                    redFlagRetrievedCountdown = flagCountdownReset;
+                    isRedFlagRetrieved = false;
+                }
+            }
+
+            //Red flag has been captured
+            if (isRedFlagCaptured)
+            {
+                redFlagCapturedCountdown -= 1 * Time.deltaTime;
+                redFlagCapturedTxt.enabled = true;
+                if ((int)redFlagCapturedCountdown == 0)
+                {
+                    redFlagCapturedTxt.enabled = false;
+                    redFlagCapturedCountdown = flagCountdownReset;
+                    isRedFlagCaptured = false;
+                }
+            }    
+
             //rejuv activated
             if (rejuvCounter)
             {
                 rejuvCountdown -= 1 * Time.deltaTime; //start countdown
                 if ((int)rejuvCountdown != 0)
                 {
+                    //every 5 seconds increase health
                     if ((int)rejuvCountdown %5 == 0 && health < totalHealth && (int)rejuvCountdown != tempPerk)
                     {
-                        tempPerk = (int)rejuvCountdown;
-                    //within 5 HP radius, give full health
+                        tempPerk = (int)rejuvCountdown; //ensures only allocated rejuvinated health is given during that 5 second span
+                    //within 10 HP radius, give full health
                     if (health >= totalHealth - 10)
                         health = totalHealth;
-                    //give 5 HP
                     else
                         health += 10;
                     }
@@ -351,6 +483,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
                     rejuvCounter = false;
                     rejuvCountdown = perkResetTimer;
                     rejuvenationEffect.SetActive(false);
+                    noLongerActivePerkGUI();
                 }
             }
 
@@ -358,15 +491,20 @@ namespace UnityStandardAssets.Characters.FirstPerson
             if (nimbleCounter)
             {
                 nimbleCountdown -= 1 * Time.deltaTime; //start countdown
-                if ((int)nimbleCountdown != 0)
+                if ((int)nimbleCountdown != 0 && nimbleFlag)
+                {
                     m_RunSpeed *= 2; //double the run speed
-                else
+                    nimbleFlag = false;
+                }
+                else if((int)nimbleCountdown == 0)
                 {
                     //perk ended, reset back to default
                     m_RunSpeed /= 2;
                     nimbleCounter = false;
+                    nimbleFlag = true;
                     nimbleCountdown = perkResetTimer;
                     nimbleEffect.SetActive(false);
+                    noLongerActivePerkGUI();
                 }
             }
 
@@ -374,15 +512,20 @@ namespace UnityStandardAssets.Characters.FirstPerson
             if (rapidCounter)
             {
                 rapidCountdown -= 1 * Time.deltaTime; //start countdown
-                if ((int)rapidCountdown != 0)
+                if ((int)rapidCountdown != 0 && rapidFlag)
+                {
                     shootRate /= 2; //half time needed to shoot
-                else
+                    rapidFlag = false;
+                }
+                else if ((int)rapidCountdown == 0)
                 {
                     //perk ended, reset back to default
                     shootRate *= 2;
                     rapidCounter = false;
                     rapidCountdown = perkResetTimer;
                     rapidFireEffect.SetActive(false);
+                    rapidFlag = true;
+                    noLongerActivePerkGUI();
                 }
             }
 
@@ -390,15 +533,20 @@ namespace UnityStandardAssets.Characters.FirstPerson
             if (shieldCounter)
             {
                 shieldCountdown -= 1 * Time.deltaTime; //start countdown
-                if ((int)shieldCountdown != 0)
+                if ((int)shieldCountdown != 0 && shieldFlag)
+                {
                     invincible = true; //player cannot be hurt
-                else
+                    shieldFlag = false;
+                }  
+                else if((int)shieldCountdown == 0)
                 {
                     //perk ended, reset back to default
                     invincible = false;
                     shieldCounter = false;
                     shieldCountdown = perkResetTimer;
                     shieldEffect.SetActive(false);
+                    shieldFlag = true;
+                    noLongerActivePerkGUI();
                 }
 
             }
@@ -429,6 +577,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
                     {
                         enemies[i].SendMessage("markerDeactivate", false);
                     }
+                    noLongerActivePerkGUI();
                 }
             }
 
@@ -482,6 +631,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
                             //if total ammo is less or equal to standard clip amount, put all ammo in last clip
                             else if (playerTotalAmmo <= clipLimit)
                             {
+                                unloading = true;
                                 playerClip += playerTotalAmmo;
                                 playerTotalAmmo = 0;
                             }
@@ -536,8 +686,15 @@ namespace UnityStandardAssets.Characters.FirstPerson
             {
                 canMove = false;
                 respawnEffect.SetActive(true); //effect for respawning
-                //move player back to 1st spawn position
-                if (transform.position != spawnPositions[0].position)
+                if (flag != null)
+                {
+                    Debug.Log(flag);
+                    Destroy(flag.gameObject);
+                    enemyFlagLocation = atBase;
+                    isRedFlagRetrieved = true;
+                }
+                    //move player back to 1st spawn position
+                    if (transform.position != spawnPositions[0].position)
                     transform.position = spawnPositions[0].position;
                 respawnCountdown -= 1 * Time.deltaTime; //start counter
                 textTime = string.Format("{0:0}", respawnCountdown); //Show respawn message
@@ -631,6 +788,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         //Removes perk just used and updates list, calls method to update GUI
         private void UpdatePerkList() {
+            //Display the perk just used
+            displayActivePerkGUI();
             //Remove the perk after using it
             currentPerks.RemoveAt(0);
             //Update the list
@@ -642,6 +801,45 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 } 
             }
             UpdatePerkGUI();
+        }
+
+        //Display the perk(s) currently being used
+        public void displayActivePerkGUI()
+        {
+            //Loop to find what image to chose
+            for (int i = 0; i < activerPerksImg.Length; i++)
+            {
+                //Add perk image to next available image slot
+                if (!activerPerksImg[i].enabled == true && activeAssignNext == false)
+                {
+                    //loop to match string to sprite to display
+                    for (int j = 0; j < listOfPerks.Count; j++)
+                    {
+                        //assigning
+                        if (currentPerks[0].Equals(listOfPerks[j].name))
+                        {
+                            activerPerksImg[i].overrideSprite = listOfPerks[j];
+                            activerPerksImg[i].enabled = true;
+                            activeAssignNext = true;
+                        }
+                    }
+                }
+            }
+            activeAssignNext = false;
+        }
+
+        //Removes the perk from the active perk GUI once it has been finished
+        public void noLongerActivePerkGUI()
+        {
+            //bool removeFlag = true;
+            for (int i = 0; i < activerPerksImg.Length; i++)
+            {
+                if (activerPerksImg[i].enabled == true)
+                {
+                    activerPerksImg[i].enabled = false;
+                    break;
+                }
+            }
         }
 
         //Updates the GUI perk elements on the screen
@@ -685,6 +883,9 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 //you lose
                 defeat.enabled = true;
             }
+            EndGame.enabled = true;
+            canMove = false;
+            cameraMove = false;
             //open menu saying play again or main menu
         }
 
@@ -699,7 +900,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             }
         }
 
-
+        //Sound for when the player lands on the ground after jumping
         private void PlayLandingSound()
         {
             m_AudioSource.clip = m_LandSound;
@@ -708,7 +909,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         }
 
         //Currently empty method as scores are not given to the enemy, here for game expansion
-        public void defeatedBy(string s) {}
+        public void defeatedBy(GameObject s) {}
 
         private void FixedUpdate()
         {
@@ -785,14 +986,17 @@ namespace UnityStandardAssets.Characters.FirstPerson
             {
                 return;
             }
-            // pick & play a random footstep sound from the array,
-            // excluding sound at index 0
-            int n = Random.Range(1, m_FootstepSounds.Length);
-            m_AudioSource.clip = m_FootstepSounds[n];
-            m_AudioSource.PlayOneShot(m_AudioSource.clip);
-            // move picked sound to index 0 so it's not picked next time
-            m_FootstepSounds[n] = m_FootstepSounds[0];
-            m_FootstepSounds[0] = m_AudioSource.clip;
+            if (walkingSound)
+            {
+                // pick & play a random footstep sound from the array,
+                // excluding sound at index 0
+                int n = Random.Range(1, m_FootstepSounds.Length);
+                m_AudioSource.clip = m_FootstepSounds[n];
+                m_AudioSource.PlayOneShot(m_AudioSource.clip);
+                // move picked sound to index 0 so it's not picked next time
+                m_FootstepSounds[n] = m_FootstepSounds[0];
+                m_FootstepSounds[0] = m_AudioSource.clip;
+            }
         }
 
 
@@ -876,7 +1080,10 @@ namespace UnityStandardAssets.Characters.FirstPerson
             body.AddForceAtPosition(m_CharacterController.velocity * 0.1f, hit.point, ForceMode.Impulse);
         }
 
-        //When player collides with an object
+        /*
+        * When player collides with an object
+        * @Collider C: object that player collides with
+        */
         public void OnTriggerEnter(Collider c)
         {
             //if this is not the players team flag then take the flag
@@ -887,8 +1094,9 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 flag.transform.parent = transform;
                 flag.transform.position = flagHolder.transform.position;
                 //update location of flag
-                enemyFlagLocation = "Taken - ";
+                enemyFlagLocation = taken;
                 c.enabled = false;
+                isRedFlagTaken = true;
             }
 
             //if player returns to flag with enemy flag
@@ -896,14 +1104,31 @@ namespace UnityStandardAssets.Characters.FirstPerson
             {
                 //Destroy the flag gameObject
                 Destroy(flag.gameObject);
-                //Destroy(flagMist.gameObject);
                 scoreAlly++;
                 //update location of flag
-                enemyFlagLocation = "At Base -";
+                enemyFlagLocation = atBase;
+                isRedFlagCaptured = true;
             }
+
+            //if bullet hits the player, stick to the player
+            if(c.transform.tag == "BulletSplat")
+                c.transform.parent = gameObject.transform;
         }
 
-        //when player picks up ammo
+        /*
+        * This method tells the player if he can play his default stepping audio
+        * Only set to false when in water
+        * @Bool b = true or false to playing audio
+        */
+        public void playWalkingAudio(bool b)
+        {
+            walkingSound = b;
+        }
+
+        /*
+        * When player picks up ammo
+        * @int i: ammount of ammo given to player
+        */
         public void ammoPickup (int i)
         {
             playerTotalAmmo += i;
@@ -913,7 +1138,10 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 //reload();
         }
 
-        //When player picks up health
+        /*
+        * When player picks up health pack
+        * @int i: ammount of health given to player
+        */
         public void healthPickup (int i)
         {
             //if health is not max
@@ -981,6 +1209,12 @@ namespace UnityStandardAssets.Characters.FirstPerson
             quitOptions.enabled = true;
         }
 
+        //If the player decides to play the game again
+        public void playAgain()
+        {
+            StartCoroutine(LoadScreen("MainLevel"));
+        }
+
         /*
         * This function gets a string from the player input field and compares it to some set string.
         * These strings are cheat codes and are used souly for testing purposes.
@@ -991,8 +1225,26 @@ namespace UnityStandardAssets.Characters.FirstPerson
             string code = inputFieldText.text;
             canMove = true; //after done entering cheat allow player to move again
             inputField.gameObject.SetActive(false);
-            if (code.Equals("Score"))
-                playerScore = 1000;
+            //increase score to 9000
+            if (code.Equals("level9000"))
+                playerScore = 9000;
+            //give player all perks
+            if (code.Equals("perkMeUp"))
+            {
+                getPerk("radar");
+                getPerk("Rejuv");
+                getPerk("rapid");
+                getPerk("shield");
+                getPerk("Nimble");
+            }
+            //Player wins the game
+            if (code.Equals("victoryShallBeMine"))
+                scoreAlly = scoreLimit;
+            //player loses the game
+            if (code.Equals("utterDefeat"))
+            {
+                scoreEnemy = scoreLimit;
+            }
         }
 
         //Saves the score of the player after the game is closed
@@ -1060,6 +1312,5 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 yield return null;
             }
         }
-
     }
 }

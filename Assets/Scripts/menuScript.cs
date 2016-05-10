@@ -111,7 +111,10 @@ public class menuScript : MonoBehaviour {
         StartCoroutine(LoadScreen("MainLevel"));
     }
 
-    //show loading screen while level loads in the backgrund
+    /*
+    * show loading screen while level loads in the backgrund
+    * @String level: level to load
+    */
     IEnumerator LoadScreen(string level)
     {
         //Get random load screen and tip

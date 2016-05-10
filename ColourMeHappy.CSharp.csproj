@@ -87,10 +87,8 @@
     <Compile Include="Assets\Rocks and Boulders 2\Standard Assets\Image Effects (Pro Only)\SepiaToneEffect.cs" />
     <Compile Include="Assets\Rocks and Boulders 2\Standard Assets\Image Effects (Pro Only)\TwirlEffect.cs" />
     <Compile Include="Assets\Rocks and Boulders 2\Standard Assets\Image Effects (Pro Only)\VortexEffect.cs" />
-    <Compile Include="Assets\Scripts\AllySpawnManager.cs" />
     <Compile Include="Assets\Scripts\AmmoPickup.cs" />
     <Compile Include="Assets\Scripts\Bullet.cs" />
-    <Compile Include="Assets\Scripts\EnemySpawnManager.cs" />
     <Compile Include="Assets\Scripts\GameManager.cs" />
     <Compile Include="Assets\Scripts\Gradient.cs" />
     <Compile Include="Assets\Scripts\MenuUpgrades.cs" />
@@ -99,8 +97,11 @@
     <Compile Include="Assets\Scripts\Orb.cs" />
     <Compile Include="Assets\Scripts\PerkGuardNodePoint.cs" />
     <Compile Include="Assets\Scripts\SimpleFSM.cs" />
+    <Compile Include="Assets\Scripts\WaterAudio.cs" />
     <Compile Include="Assets\Scripts\healthPickup.cs" />
     <Compile Include="Assets\Scripts\menuScript.cs" />
+    <Compile Include="Assets\Scripts\toDelete\AllySpawnManager.cs" />
+    <Compile Include="Assets\Scripts\toDelete\EnemySpawnManager.cs" />
     <Compile Include="Assets\_MK\_MKGlowSystem\_Demo\Code\MK_DemoControl.cs" />
     <Compile Include="Assets\_MK\_MKGlowSystem\_Demo\Code\MK_RotateObject.cs" />
     <Compile Include="Assets\_MK\_MKGlowSystem\_Internal\MKGlow.cs" />

@@ -49,10 +49,11 @@ public class SimpleFSM : MonoBehaviour
     public float chaseSpeed = 4.0f;
 
     
-
-    private NavMeshAgent nav;
-    public int waypointLocation = 0;
+    
+    private NavMeshAgent nav; //nav mesh agent
+    public int waypointLocation = 0; //Current waypoint location tracker
     public float centralPos;
+
     /*
      * Initialize the Finite state machine for the NPC tank
      */
@@ -74,7 +75,6 @@ public class SimpleFSM : MonoBehaviour
             print("Player doesn't exist.. Please add one with Tag named 'Player'");
 
 	}
-
 
     // Update each frame
     void Update() {
@@ -112,8 +112,7 @@ public class SimpleFSM : MonoBehaviour
             curState = FSMState.Dead;
     }
 
-
-    protected Vector3 destPos;
+    protected Vector3 destPos; //destination
 
 	/*
      * Patrol state
@@ -144,6 +143,7 @@ public class SimpleFSM : MonoBehaviour
             curState = FSMState.Chase;
         }
     }
+
     /*
      * Chase state
 	 */
@@ -212,12 +212,15 @@ public class SimpleFSM : MonoBehaviour
         }
     }
 
-    // Apply Damage if hit by bullet
+    /* 
+    * Apply Damage if hit by bullet
+    * @int damage: damage to be applied when hit
+    */
     public void takeDamage(int damage ) {
     	health -= damage;
     }
 
-
+    //draw objects on the screen - DEBUGGING
 	void OnDrawGizmos () {
 		Gizmos.color = Color.yellow;
 		Gizmos.DrawWireSphere(transform.position, chaseRange);
