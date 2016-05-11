@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using UnityStandardAssets.Characters.FirstPerson;
 
 /*
  * Written by: AJ Abotomey
@@ -25,7 +26,7 @@ public class SimpleFSM : MonoBehaviour
     public FSMState curState;
 
     //waypoints
-    public GameObject[] waypointList;
+	public GameObject[] waypointList;
 
 	protected Transform playerTransform;// Player Transform
 	
@@ -33,8 +34,8 @@ public class SimpleFSM : MonoBehaviour
 	public GameObject bullet;
 	public GameObject bulletSpawnPoint;
 
-	// Bullet shooting rate
-	public float shootRate = 0.4f;
+    // Bullet shooting rate
+    public float shootRate = 0.4f;
 	protected float elapsedTime;
 
     // Whether the NPC is destroyed or not
@@ -48,11 +49,26 @@ public class SimpleFSM : MonoBehaviour
     public int rotSpeed = 11;
     public float chaseSpeed = 4.0f;
 
-    
-    
-    private NavMeshAgent nav; //nav mesh agent
-    public int waypointLocation = 0; //Current waypoint location tracker
+    private NavMeshAgent nav;
+    public int waypointLocation = 0;
     public float centralPos;
+
+    //respawning
+    public float respawnCountdown;
+    public float respawnReset;
+    public GameObject respawnEffect;
+    public Transform[] guardSpawnPosition = new Transform[2];
+
+    //who defeated this enemy
+    public string defeater;
+    public bool invulnerable;
+    FirstPersonController fp;
+
+    // audio reboot clip
+    public AudioClip reboot;
+
+    //player score update
+    private int scoreUpdate;
 
     /*
      * Initialize the Finite state machine for the NPC tank
@@ -63,7 +79,10 @@ public class SimpleFSM : MonoBehaviour
 
         bDead = false;
         elapsedTime = 0.0f;
-
+        //scoreUpdate = 10;
+        respawnReset = 10f;
+        // set respawn timer
+        respawnCountdown = respawnReset;
         // Get the target enemy(Player)
         GameObject objPlayer = GameObject.FindGameObjectWithTag("Player");
         playerTransform = objPlayer.transform;
@@ -71,14 +90,16 @@ public class SimpleFSM : MonoBehaviour
         //make the nav mesh accessible
         nav = GetComponent<NavMeshAgent>();
 
-        if(!playerTransform)
+        if (!playerTransform)
             print("Player doesn't exist.. Please add one with Tag named 'Player'");
 
 	}
 
+
     // Update each frame
     void Update() {
-        switch (curState) {
+        switch (curState)
+        {
             case FSMState.Patrol: UpdatePatrolState(); break;
             case FSMState.Chase: UpdateChaseState(); break;
             case FSMState.Attack: UpdateAttackState(); break;
@@ -87,6 +108,42 @@ public class SimpleFSM : MonoBehaviour
 
         // Update the time
         elapsedTime += Time.deltaTime;
+
+        // Go to dead state if no health left
+        if (health <= 0)
+        {
+            curState = FSMState.Dead;
+            // enemy has no health left
+            respawnCountdown -= 1 * Time.deltaTime; //start counter
+            respawnEffect.SetActive(true); //respawn effect
+            nav.velocity = Vector3.zero;
+            nav.Stop();
+            invulnerable = true;
+
+            ////if player shot last bullet to kill enemy update score
+            //if (defeater.Equals(playerTransform.tag) && !invulnerable)
+            //{
+            //    fp = playerTransform.GetComponent<FirstPersonController>();
+            //    fp.playerScore += scoreUpdate;
+            //    Debug.Log(fp.playerScore);
+            //}
+
+            //take back to guard spawn position after a 3 second wait
+            if (transform.position != guardSpawnPosition[0].position && (int)respawnCountdown == (int)respawnReset - 2)
+                nav.Warp(guardSpawnPosition[0].position);
+                transform.Rotate(0f, rotSpeed * Time.deltaTime + 7, 0f);
+                AudioSource.PlayClipAtPoint(reboot, transform.position);
+            //reset the respawn counter
+            if ((int)respawnCountdown == 0)
+            {
+                nav.ResetPath(); //reset navigation path
+                health = 100;
+                invulnerable = false;
+                respawnCountdown = respawnReset;
+                respawnEffect.SetActive(false);
+            }
+        }
+
 
         //
         float distance = Vector3.Distance(transform.position, playerTransform.position);
@@ -98,7 +155,7 @@ public class SimpleFSM : MonoBehaviour
         }
         else if (distance > chaseRange)
         {
-            curState = FSMState.Patrol;
+			curState = FSMState.Patrol;
         }
 
         // Attack state change
@@ -107,12 +164,19 @@ public class SimpleFSM : MonoBehaviour
             curState = FSMState.Attack;
         }
 
-        // Go to dead state if no health left
-        if (health <= 0)
-            curState = FSMState.Dead;
+       
     }
 
-    protected Vector3 destPos; //destination
+    /*
+    * Used to find out who shot the final bullet to kill the enemy
+    * @string s: Origin of the bullet that was shot
+    */
+    public void defeatedBy(string s)
+    {
+        defeater = s;
+    }
+
+    protected Vector3 destPos;
 
 	/*
      * Patrol state
@@ -143,7 +207,6 @@ public class SimpleFSM : MonoBehaviour
             curState = FSMState.Chase;
         }
     }
-
     /*
      * Chase state
 	 */
@@ -195,6 +258,7 @@ public class SimpleFSM : MonoBehaviour
             bDead = true;
             nav.Stop();
             nav.enabled = false;
+
         }
     }
 
@@ -212,15 +276,13 @@ public class SimpleFSM : MonoBehaviour
         }
     }
 
-    /* 
-    * Apply Damage if hit by bullet
-    * @int damage: damage to be applied when hit
-    */
+    // Apply Damage if hit by bullet
     public void takeDamage(int damage ) {
     	health -= damage;
+        Debug.Log(health);
     }
 
-    //draw objects on the screen - DEBUGGING
+
 	void OnDrawGizmos () {
 		Gizmos.color = Color.yellow;
 		Gizmos.DrawWireSphere(transform.position, chaseRange);
