@@ -886,6 +886,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             EndGame.enabled = true;
             canMove = false;
             cameraMove = false;
+            playerScoreTxt.enabled = true;
             //open menu saying play again or main menu
         }
 
@@ -1180,11 +1181,13 @@ namespace UnityStandardAssets.Characters.FirstPerson
             pauseMenu.enabled = true;
             cameraMove = false;
             canMove = false;
+            playerScoreTxt.enabled = true;
         }
 
         //Load the main menu
         public void exitToMainMenu()
         {
+            saveScore();
             StartCoroutine(LoadScreen("MainMenu"));
         }
 
@@ -1200,6 +1203,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         {
             quitOptions.enabled = false;
             pauseMenu.enabled = true;
+            playerScoreTxt.enabled = false;
         }
 
         //Open quit menu to confirm exit
@@ -1245,6 +1249,11 @@ namespace UnityStandardAssets.Characters.FirstPerson
             {
                 scoreEnemy = scoreLimit;
             }
+        }
+
+        public void outOfBounds()
+        {
+            health = 0;
         }
 
         //Saves the score of the player after the game is closed

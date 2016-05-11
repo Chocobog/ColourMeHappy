@@ -25,6 +25,8 @@ public class GameManager : MonoBehaviour
     private float alphaFadeValue = 0;
     public Texture fader; //place holder texture
 
+    GameObject playerTransform;
+
 
     // Use this for initialization
     void Start()
@@ -70,8 +72,8 @@ public class GameManager : MonoBehaviour
             //if timer reaches 0 Destroy object and reset timer
             if (textTime.Equals("0"))
             {
-                GetComponent<FirstPersonController>().health = 0;
-                //Destroy(col.gameObject);
+                playerTransform = GameObject.FindGameObjectWithTag("Player");
+                playerTransform.SendMessage("outOfBounds");
                 outOfBoundsTimer = 5.0f;
             }
         }

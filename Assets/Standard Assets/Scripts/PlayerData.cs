@@ -16,6 +16,5 @@ public class PlayerData {
     public int playerReloadSpeedMod;
     public int playerFireRateMod;
     public int playerStartingAmmoMod;
-
-    //public Image[] healthLoadIng;
+    public Image[] healthLoadIng;
 }

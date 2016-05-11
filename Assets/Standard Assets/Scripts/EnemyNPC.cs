@@ -409,14 +409,14 @@ public class EnemyNPC : MonoBehaviour
             AllyNPC anpc = playerAlly.GetComponent<AllyNPC>();
             float dist = Vector3.Distance(playerAlly.transform.position, currentPos); // ally distance
             //if player distance or ally of player distance is closer then last found one
-            //if (anpc.health > 0)//if player allies health is above 0 then add player to search
-            //{
+           if (anpc.health > 0)//if player allies health is above 0 then add player to search
+            {
                 if (dist < minDist)
                 {
                     minDist = dist;
                     tMin = playerAlly.transform;
                 }
-           // }
+            }
             //if players health is above 0 then add player to search
             if (fp.health > 0)
             {
