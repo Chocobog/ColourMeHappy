@@ -10,11 +10,18 @@ using UnityEngine.UI;
 */
 [Serializable]
 public class PlayerData {
+    //save player data
     public int finalScore;
     public int playerHealthMod;
     public int playerMoveSpeedMod;
-    public int playerReloadSpeedMod;
-    public int playerFireRateMod;
+    public float playerReloadSpeedMod;
+    public float playerFireRateMod;
     public int playerStartingAmmoMod;
-    public Image[] healthLoadIng;
+
+    //save where the counter is for the images
+    public int counterHealth;
+    public int counterMoveSpeed;
+    public int counterRapidFire;
+    public int counterReloadSpeed;
+    public int counterStartingAmmo;
 }

@@ -83,7 +83,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public int scoreAlly; //score of ally team
         public int scoreEnemy; //score of enemy team
         public int scoreLimit = 3; //total limit of flags to be captured
-        public int playerScore; //score of the player
+        public int playerScore = 0; //score of the player
         public GameObject[] perksAvailable; //perks player can activate
         public string enemyFlagLocation; //location of enemy flag
         public string allyFlagLocation; //location of ally flag
@@ -1194,6 +1194,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         //return back to the game - resume selected on pause menu
         public void backToGame() {
             pauseMenu.enabled = false;
+            playerScoreTxt.enabled = false;
             cameraMove = true;
             canMove = true;
         }
@@ -1203,7 +1204,6 @@ namespace UnityStandardAssets.Characters.FirstPerson
         {
             quitOptions.enabled = false;
             pauseMenu.enabled = true;
-            playerScoreTxt.enabled = false;
         }
 
         //Open quit menu to confirm exit
@@ -1228,10 +1228,11 @@ namespace UnityStandardAssets.Characters.FirstPerson
         {
             string code = inputFieldText.text;
             canMove = true; //after done entering cheat allow player to move again
-            inputField.gameObject.SetActive(false);
+
             //increase score to 9000
             if (code.Equals("level9000"))
-                playerScore = 9000;
+                playerScore = 99999;
+
             //give player all perks
             if (code.Equals("perkMeUp"))
             {
@@ -1241,14 +1242,19 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 getPerk("shield");
                 getPerk("Nimble");
             }
+
             //Player wins the game
             if (code.Equals("victoryShallBeMine"))
                 scoreAlly = scoreLimit;
+
             //player loses the game
             if (code.Equals("utterDefeat"))
-            {
                 scoreEnemy = scoreLimit;
-            }
+
+            inputField.text = "";
+            inputField.DeactivateInputField();
+            inputField.gameObject.SetActive(false);
+            Debug.Log("Hitting this");
         }
 
         public void outOfBounds()
@@ -1281,11 +1287,11 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 file.Close();
 
                 //load values
-                health += data.playerHealthMod;
-                m_RunSpeed += data.playerMoveSpeedMod;
-                delay -= data.playerReloadSpeedMod;
-                shootRate -= data.playerFireRateMod;
-                playerTotalAmmo += data.playerStartingAmmoMod;
+                //health += data.playerHealthMod;
+                //m_RunSpeed += data.playerMoveSpeedMod;
+                //delay -= data.playerReloadSpeedMod;
+                //shootRate -= data.playerFireRateMod;
+                //playerTotalAmmo += data.playerStartingAmmoMod;
                 playerScore = data.finalScore;
             }
             else
