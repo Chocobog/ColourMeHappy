@@ -100,6 +100,7 @@
     <Compile Include="Assets\Scripts\WaterAudio.cs" />
     <Compile Include="Assets\Scripts\healthPickup.cs" />
     <Compile Include="Assets\Scripts\menuScript.cs" />
+    <Compile Include="Assets\Scripts\smartCrosshair.cs" />
     <Compile Include="Assets\Scripts\toDelete\AllySpawnManager.cs" />
     <Compile Include="Assets\Scripts\toDelete\EnemySpawnManager.cs" />
     <Compile Include="Assets\_MK\_MKGlowSystem\_Demo\Code\MK_DemoControl.cs" />

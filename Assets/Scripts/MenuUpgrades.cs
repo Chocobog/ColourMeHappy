@@ -135,10 +135,8 @@ public class MenuUpgrades : MonoBehaviour {
             //if this image is not enabled
             if (!healthImg[i].enabled && healthAssignOnce)
             {
-                menuScore -= upgradeCost;
                 healthImg[i].enabled = true;
                 healthAssignOnce = !healthAssignOnce;
-                
                 incHP.text = "+ " + (menuHealth) + "HP";
                 upgradeCost += 200;
                 savePlayerData();
@@ -152,10 +150,8 @@ public class MenuUpgrades : MonoBehaviour {
             //if this image is not enabled
             if (!moveSpeedImg[i].enabled && moveSpeedAssignOnce)
             {
-                menuScore -= upgradeCostms;
                 moveSpeedImg[i].enabled = true;
                 moveSpeedAssignOnce = !moveSpeedAssignOnce;
-                
                 incMS.text = "+ " + (menuMoveSpeed) + "%";
                 upgradeCostms += 200;
                 savePlayerData();
@@ -169,10 +165,8 @@ public class MenuUpgrades : MonoBehaviour {
             //if this image is not enabled
             if (!rapidFireImg[i].enabled && rapidFireAssignOnce)
             {
-                menuScore -= upgradeCostRF;
                 rapidFireImg[i].enabled = true;
                 rapidFireAssignOnce = !rapidFireAssignOnce;
-                
                 incRF.text = "- " + (menuFireRate) + " Seconds";
                 upgradeCostRF += 200;
                 savePlayerData();
@@ -186,10 +180,8 @@ public class MenuUpgrades : MonoBehaviour {
             //if this image is not enabled
             if (!reloadImg[i].enabled && reloadSpeedAssignOnce)
             {
-                menuScore -= upgradeCostRS;
                 reloadImg[i].enabled = true;
                 reloadSpeedAssignOnce = !reloadSpeedAssignOnce;
-                
                 incRS.text = "- " + (menuReloadSpeed) + " Seconds";
                 upgradeCostRS += 200;
                 savePlayerData();
@@ -203,10 +195,8 @@ public class MenuUpgrades : MonoBehaviour {
             //if this image is not enabled
             if (!startAmmoImg[i].enabled && startingAmmoAssignOnce)
             {
-                menuScore -= upgradeCostStartAmmo;
                 startAmmoImg[i].enabled = true;
                 startingAmmoAssignOnce = !startingAmmoAssignOnce;
-                
                 incStartAmmo.text = "+ " + (menuStartingAmmo) + " paintballs";
                 upgradeCostStartAmmo += 200;
                 savePlayerData();
@@ -221,6 +211,7 @@ public class MenuUpgrades : MonoBehaviour {
         //add one to the counter, update will take care of the image showing    
         if ((menuScore >= upgradeCost) && (menuScore != 0))
         {
+            menuScore -= upgradeCost;
             healthCounter++;
             menuHealth = menuHealth + 20;
         }
@@ -237,6 +228,7 @@ public class MenuUpgrades : MonoBehaviour {
     {
         if ((menuScore >= upgradeCostms) && (menuScore != 0))
         {
+            menuScore -= upgradeCostms;
             moveSpeedCounter++;
             menuMoveSpeed = menuMoveSpeed + ((int)speed * 1);
         }
@@ -253,6 +245,7 @@ public class MenuUpgrades : MonoBehaviour {
     {
         if ((menuScore >= upgradeCostRF) && (menuScore != 0))
         {
+            menuScore -= upgradeCostRF;
             rapidFireCounter++;
             menuFireRate -= 0.1f;
         }
@@ -269,6 +262,7 @@ public class MenuUpgrades : MonoBehaviour {
     {
         if ((menuScore >= upgradeCostRS) && (menuScore != 0))
         {
+            menuScore -= upgradeCostRS;
             reloadSpeedCounter++;
             menuReloadSpeed -= 0.1f;
         }
@@ -285,6 +279,7 @@ public class MenuUpgrades : MonoBehaviour {
     {
         if ((menuScore >= upgradeCostStartAmmo) && (menuScore != 0))
         {
+            menuScore -= upgradeCostStartAmmo;
             startAmmoCounter++;
             menuStartingAmmo += 5;
         }
@@ -327,7 +322,6 @@ public class MenuUpgrades : MonoBehaviour {
     //saves the players upgrades for the player to load in game
 	public void savePlayerData()
 	{
-        deleteScore();
 		BinaryFormatter bf = new BinaryFormatter ();
 		FileStream file = File.Create(Application.persistentDataPath + "/playerScore.dat"); //save to this location
 

@@ -298,33 +298,44 @@ public class EnemyNPC : MonoBehaviour
     */
     public void OnTriggerStay(Collider c)
     {
-        //if player within enemy radius
-        if (c.gameObject == playerTransform)
-        {
-            Vector3 direction = c.transform.position - transform.position; //direction of player
-            float angle = Vector3.Angle(direction, transform.forward); //angle from the direction
-
-            if (angle < lineOfSightAngle * 0.5f)
+        foreach (GameObject a in PlayerAllies) {
+            //if player within enemy radius
+            if (c.gameObject == playerTransform || c.gameObject == a)
             {
-                RaycastHit hit;
-                if (Physics.Raycast(transform.position + transform.up, direction, out hit, 400))
+                Vector3 direction = c.transform.position - transform.position; //direction of player
+                float angle = Vector3.Angle(direction, transform.forward); //angle from the direction
+
+                if (angle < lineOfSightAngle * 0.5f)
                 {
-                    //if raycast hits the player and nothing else in front of the player
-                    if (hit.collider.gameObject == playerTransform)
+                    RaycastHit hit;
+                    if (Physics.Raycast(transform.position + transform.up, direction, out hit, 400))
                     {
-                        transform.LookAt(playerTransform.transform.position); //look at the player
-                        Debug.Log("Found Player, Time to Destroy");
-                        animator.Play("idle pose with a gun"); //animation
-                        //if within a certain radius, run around the player and shoot
-                        if (Vector3.Distance(transform.position, playerTransform.transform.position) > 150f)
-                            nav.SetDestination(GameObject.FindGameObjectWithTag("Player").transform.position);
-                        else
-                            nav.Move(transform.TransformDirection(Vector3.left) * (10 * Time.deltaTime)); //move to the left
-                        ShootBullet();
+                        //if raycast hits the player and nothing else in front of the player
+                        if (hit.collider.gameObject == playerTransform)
+                        {
+                            transform.LookAt(playerTransform.transform.position); //look at the player
+                            animator.Play("idle pose with a gun"); //animation
+                                                                   //if within a certain radius, run around the player and shoot
+                            if (Vector3.Distance(transform.position, playerTransform.transform.position) > 150f)
+                                nav.SetDestination(GameObject.FindGameObjectWithTag("Player").transform.position);
+                            else
+                                nav.Move(transform.TransformDirection(Vector3.left) * (10 * Time.deltaTime)); //move to the left
+                            ShootBullet();
+                        } else if (hit.collider.gameObject == a)
+                        {
+                            transform.LookAt(a.transform.position); //look at the player
+                            animator.Play("idle pose with a gun"); //animation
+                                                                   //if within a certain radius, run around the player and shoot
+                            if (Vector3.Distance(transform.position, a.transform.position) > 150f)
+                                nav.SetDestination(a.transform.position);
+                            else
+                                nav.Move(transform.TransformDirection(Vector3.left) * (10 * Time.deltaTime)); //move to the left
+                            ShootBullet();
+                        }
+                        
                     }
                 }
             }
-
         }
         return;
     }

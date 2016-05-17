@@ -15,7 +15,7 @@ public class AllyNPC : MonoBehaviour
     //Enemy/Ally Flag
     protected GameObject playerTransform;// Player Transform
     protected GameObject[] PlayerAllies; //Player Allies Transform
-    protected GameObject[] enemyFriends; //friends of the enemy
+    protected GameObject[] enemies; //friends of the enemy
 
     // Bullet
     public GameObject bullet;
@@ -42,12 +42,12 @@ public class AllyNPC : MonoBehaviour
     Animator animator;
 
     //Player HUD update
-    public string allyFlagLocation;
+    public string enemyFlagLocation;
     public int scoreEnemy; //score of enemy team
 
     //flags and flag locations
-    public string opposingFlag = "BlueFlag";
-    public string allyFlag = "RedFlag";
+    public string opposingFlag = "RedFlag";
+    public string allyFlag = "BlueFlag";
     private string atBase = "At Base - ";
     private string taken = "Taken - ";
 
@@ -60,14 +60,11 @@ public class AllyNPC : MonoBehaviour
     public float respawnCountdown;
     public float respawnReset;
     public GameObject respawnEffect;
-    public Transform[] enemySpawnPositions = new Transform[6];
+    public Transform[] allySpawnPositions = new Transform[6];
 
     //navmesh agent (enemy)
     private NavMeshAgent nav;
     NavMeshPath path; //navmesh path
-
-    //player score update
-    private int scoreUpdate;
 
     //For radar effect - FPS script
     public GameObject marker;
@@ -76,7 +73,7 @@ public class AllyNPC : MonoBehaviour
 
 
     public bool FC; //Flag carrier
-    public bool isEnemyFlagCarrier; //changes if any other enemy picks up the flag
+    public bool isAllyFlagCarrier; //changes if any other enemy picks up the flag
     FirstPersonController fp; //first person controller
 
     float randomDecision; //random decision that AI makes
@@ -88,25 +85,24 @@ public class AllyNPC : MonoBehaviour
         box = GetComponent<BoxCollider>();
         path = new NavMeshPath();
 
-        opposingFlag = "BlueFlag";
-        allyFlag = "RedFlag";
+        opposingFlag = "RedFlag";
+        allyFlag = "BlueFlag";
         atBase = "At Base - ";
         taken = "Taken - ";
 
         elapsedTime = 0.0f;
-        allyFlagLocation = atBase;
+        enemyFlagLocation = atBase;
 
         // Target enemies
         playerTransform = GameObject.FindGameObjectWithTag("Player");
         PlayerAllies = GameObject.FindGameObjectsWithTag("Ally");
-        enemyFriends = GameObject.FindGameObjectsWithTag("Enemy");
+        enemies = GameObject.FindGameObjectsWithTag("Enemy");
 
         invulnerable = false;
         respawnReset = 10f;
         respawnCountdown = respawnReset; // set respawn timer
         showMarker = false;
-        scoreUpdate = 10;
-        isEnemyFlagCarrier = false;
+        isAllyFlagCarrier = false;
         FC = false;
         respawned = false;
 
@@ -130,23 +126,17 @@ public class AllyNPC : MonoBehaviour
             if (flag != null)
             {
                 Destroy(flag.gameObject); //if enemy has the flag, destroy when the are defeated
-                allyFlagLocation = atBase;
-                fp.allyFlagLocation = atBase;//update when destroyed
+                enemyFlagLocation = atBase;
+                fp.enemyFlagLocation = atBase;//update when destroyed
                 FC = false;
-                isEnemyFlagCarrier = false;
-                fp.isBlueFlagRetrieved = true;
+                isAllyFlagCarrier = false;
+                fp.isRedFlagRetrieved = true;
                 //Update on enemies that FC has been destroyed
-                foreach (GameObject friends in enemyFriends)
+                foreach (GameObject friends in PlayerAllies)
                     friends.SendMessage("flagTaken", false);
             }
-            //if player shot last bullet to kill enemy update score
-            if (defeater.Equals(playerTransform.tag) && !invulnerable)
-            {
-                fp = playerTransform.GetComponent<FirstPersonController>();
-                fp.playerScore += scoreUpdate;
-            }
-            int randomSpawn = Random.Range(0, enemySpawnPositions.Length);
-            Vector3 spawnPoint = enemySpawnPositions[randomSpawn].position;
+            int randomSpawn = Random.Range(0, allySpawnPositions.Length);
+            Vector3 spawnPoint = allySpawnPositions[randomSpawn].position;
             Collider[] hitColliders = Physics.OverlapSphere(spawnPoint, 0.1f);
             //take back to random enemy base spawn position, after 3 seconds (visual effect for player)
             if (hitColliders.Length == 0 && (int)respawnCountdown <= (int)respawnReset - 3 && !respawned)
@@ -155,7 +145,7 @@ public class AllyNPC : MonoBehaviour
                 respawned = true;
             }
             else if (hitColliders.Length > 0)
-                randomSpawn = Random.Range(0, enemySpawnPositions.Length); //choose another random location if this one is occupied
+                randomSpawn = Random.Range(0, allySpawnPositions.Length); //choose another random location if this one is occupied
 
             //respawn over - set back to default
             if ((int)respawnCountdown == 0)
@@ -170,20 +160,20 @@ public class AllyNPC : MonoBehaviour
         else
         {
             //Enemy is alive
-            foreach (GameObject ally in PlayerAllies)
+            foreach (GameObject enemy in enemies)
             {
                 //if no allies or player is within distance 
                 animator.Play("idle");
                 fp = playerTransform.GetComponent<FirstPersonController>(); //used to get location of enemy flag
                 //if enemy flag has been taken and this instance is the flag carrier
-                if (FC && fp.enemyFlagLocation.Equals(taken))
+                if (FC && fp.allyFlagLocation.Equals(taken))
                 {
                     Debug.Log("3");
-                    nav.CalculatePath(GameObject.FindGameObjectWithTag("enemySafeSpot").transform.position, path);
+                    nav.CalculatePath(GameObject.FindGameObjectWithTag("allySafeSpot").transform.position, path);
                     nav.SetPath(path);
                 }
                 //if this enemy is not the FC and we have taken player flag OR if both teams have taken the flag
-                else if (!FC && isEnemyFlagCarrier || allyFlagLocation.Equals(taken) && fp.enemyFlagLocation.Equals(taken))
+                else if (!FC && isAllyFlagCarrier || enemyFlagLocation.Equals(taken) && fp.allyFlagLocation.Equals(taken))
                 {
 
                     //Randomly choose to find allies/player and destroy or follow to protect the FC
@@ -199,7 +189,7 @@ public class AllyNPC : MonoBehaviour
                         nav.CalculatePath(GameObject.FindGameObjectWithTag(opposingFlag).transform.position, path); //Go to FC
                         nav.SetPath(path);
                         //if within 20f of the FC
-                        if (Vector3.Distance(nav.transform.position, GameObject.FindGameObjectWithTag("enemySafeSpot").transform.position) < 100f)
+                        if (Vector3.Distance(nav.transform.position, GameObject.FindGameObjectWithTag("allySafeSpot").transform.position) < 100f)
                         {
                             nav.CalculatePath(closestEnemy(PlayerAllies).position, path); //Go to closest allie or player
                             nav.SetPath(path);
@@ -212,7 +202,7 @@ public class AllyNPC : MonoBehaviour
                     }
                 }
                 //if player has taken enemy flag and this instance is now an FC
-                else if (fp.enemyFlagLocation.Equals(taken))
+                else if (fp.allyFlagLocation.Equals(taken))
                 {
                     //if distance to player flag is < then distance to enemy flag then go to the player flag
                     if (Vector3.Distance(transform.position, GameObject.FindGameObjectWithTag(opposingFlag).transform.position) < Vector3.Distance(transform.position, GameObject.FindGameObjectWithTag(allyFlag).transform.position))
@@ -229,7 +219,7 @@ public class AllyNPC : MonoBehaviour
                     }
                 }
                 //if your the flag carrier and enemy flag is at the base
-                else if (FC && fp.enemyFlagLocation.Equals(atBase))
+                else if (FC && fp.allyFlagLocation.Equals(atBase))
                 {
                     Debug.Log("4");
                     nav.CalculatePath(GameObject.FindGameObjectWithTag(allyFlag).transform.position, path); //go back to flag for capture
@@ -237,7 +227,7 @@ public class AllyNPC : MonoBehaviour
                 }
 
                 //if blue flag is at the base, attempt to capture flag
-                else if (allyFlagLocation.Equals(atBase) && GameObject.FindGameObjectWithTag(opposingFlag))
+                else if (enemyFlagLocation.Equals(atBase) && GameObject.FindGameObjectWithTag(opposingFlag))
                 {
                     Debug.Log("7");
                     nav.CalculatePath(GameObject.FindGameObjectWithTag(opposingFlag).transform.position, path);
@@ -257,8 +247,8 @@ public class AllyNPC : MonoBehaviour
         //if this is not the enemies team flag then take the flag if hit by enemy box collider
         if (c.transform.tag == opposingFlag)
         {
-            allyFlagLocation = taken;
-            fp.allyFlagLocation = taken;
+            enemyFlagLocation = taken;
+            fp.enemyFlagLocation = taken;
             //Add flag to player 
             flag = c.transform;
             flag.transform.parent = transform;
@@ -266,9 +256,9 @@ public class AllyNPC : MonoBehaviour
             c.enabled = false;
             //update location of flag
             FC = true;
-            isEnemyFlagCarrier = true;
-            fp.isBlueFlagTaken = true;
-            foreach (GameObject friends in enemyFriends)
+            isAllyFlagCarrier = true;
+            fp.isRedFlagTaken = true;
+            foreach (GameObject friends in PlayerAllies)
             {
                 friends.SendMessage("flagTaken", true);
             }
@@ -278,16 +268,16 @@ public class AllyNPC : MonoBehaviour
         if (c.transform.tag == allyFlag && flag != null)
         {
             FC = false;
-            isEnemyFlagCarrier = false;
-            fp.scoreEnemy++;
+            isAllyFlagCarrier = false;
+            fp.scoreAlly++;
             Destroy(flag.gameObject); //Destroy the flag gameObject
             //update location of flag
-            allyFlagLocation = atBase;
+            enemyFlagLocation = atBase;
             fp.allyFlagLocation = atBase;
-            fp.isBlueFlagCaptured = true;
-            foreach (GameObject friends in enemyFriends)
+            fp.isRedFlagCaptured = true;
+            foreach (GameObject friends in PlayerAllies)
             {
-                friends.SendMessage("flagTaken", isEnemyFlagCarrier);
+                friends.SendMessage("flagTaken", false);
             }
         }
     }
@@ -299,32 +289,32 @@ public class AllyNPC : MonoBehaviour
     public void OnTriggerStay(Collider c)
     {
         //if player within enemy radius
-        if (c.gameObject == playerTransform)
-        {
-            Vector3 direction = c.transform.position - transform.position; //direction of player
-            float angle = Vector3.Angle(direction, transform.forward); //angle from the direction
-
-            if (angle < lineOfSightAngle * 0.5f)
+        foreach (GameObject e in enemies) {
+            if (c.gameObject == e)
             {
-                RaycastHit hit;
-                if (Physics.Raycast(transform.position + transform.up, direction, out hit, 400))
+                Vector3 direction = c.transform.position - transform.position; //direction of player
+                float angle = Vector3.Angle(direction, transform.forward); //angle from the direction
+
+                if (angle < lineOfSightAngle * 0.5f)
                 {
-                    //if raycast hits the player and nothing else in front of the player
-                    if (hit.collider.gameObject == playerTransform)
+                    RaycastHit hit;
+                    if (Physics.Raycast(transform.position + transform.up, direction, out hit, 400))
                     {
-                        transform.LookAt(playerTransform.transform.position); //look at the player
-                        Debug.Log("Found Player, Time to Destroy");
-                        animator.Play("idle pose with a gun"); //animation
-                        //if within a certain radius, run around the player and shoot
-                        if (Vector3.Distance(transform.position, playerTransform.transform.position) > 150f)
-                            nav.SetDestination(GameObject.FindGameObjectWithTag("Player").transform.position);
-                        else
-                            nav.Move(transform.TransformDirection(Vector3.left) * (10 * Time.deltaTime)); //move to the left
-                        ShootBullet();
+                        //if raycast hits enemy
+                        if(hit.collider.gameObject == e) {
+                            transform.LookAt(e.transform.position); //look at the player
+                            Debug.Log("Found players enemy, Time to Destroy");
+                            animator.Play("idle pose with a gun"); //animation
+                            //if within a certain radius, run around the player and shoot
+                            if (Vector3.Distance(transform.position, e.transform.position) > 150f)
+                                nav.SetDestination(e.transform.position);
+                            else
+                                nav.Move(transform.TransformDirection(Vector3.left) * (10 * Time.deltaTime)); //move to the left
+                            ShootBullet();
+                        }
                     }
                 }
             }
-
         }
         return;
     }
@@ -335,7 +325,7 @@ public class AllyNPC : MonoBehaviour
     */
     public void flagTaken(bool b)
     {
-        isEnemyFlagCarrier = b;
+        isAllyFlagCarrier = b;
         randomDecision = Random.Range(0, 2);
     }
 
@@ -346,7 +336,6 @@ public class AllyNPC : MonoBehaviour
         {
             if ((bulletSpawnPoint) & (bullet))
             {
-
                 GameObject spawnOrigin = (GameObject)Instantiate(bullet, transform.position, transform.rotation);
                 spawnOrigin.SendMessage("spawnOrigin", gameObject); //send message to the bullet to say who shot this bullet
                 animator.Play("shot"); //animation for shooting
@@ -375,26 +364,6 @@ public class AllyNPC : MonoBehaviour
     }
 
     /*
-    * Activates the enemy marker for the player to see
-    * @bool b: Passed from the FPS script when radar effect triggered
-    */
-    public void markerActivate(bool b)
-    {
-        showMarker = b;
-        marker.SetActive(showMarker);
-    }
-
-    /*
-    * Deactivates the enemy marker for the player
-    * @bool b: Passed from the FPS script when radar effect ends
-    */
-    public void markerDeactivate(bool b)
-    {
-        showMarker = b;
-        marker.SetActive(showMarker);
-    }
-
-    /*
     * Returns the closest player or allies position
     * @Gameobject[] g: Array of player allies 
     */
@@ -403,40 +372,20 @@ public class AllyNPC : MonoBehaviour
         Transform tMin = null;
         float minDist = Mathf.Infinity;
         Vector3 currentPos = transform.position;
-        float playerDist = Vector3.Distance(playerTransform.transform.position, currentPos); //player distance
-        foreach (GameObject playerAlly in g)
+        foreach (GameObject enemyNPC in g)
         {
-            AllyNPC anpc = playerAlly.GetComponent<AllyNPC>();
-            float dist = Vector3.Distance(playerAlly.transform.position, currentPos); // ally distance
-                                                                                      //if player distance or ally of player distance is closer then last found one
-                                                                                      //if (anpc.health > 0)//if player allies health is above 0 then add player to search
-                                                                                      //{
-            if (dist < minDist)
+            EnemyNPC enpc = enemyNPC.GetComponent<EnemyNPC>();
+            float dist = Vector3.Distance(enemyNPC.transform.position, currentPos); // ally distance
+            //if enemy distance is closer then last found one
+            if (enpc.health > 0)//if player allies health is above 0 then add player to search
             {
-                minDist = dist;
-                tMin = playerAlly.transform;
-            }
-            // }
-            //if players health is above 0 then add player to search
-            if (fp.health > 0)
-            {
-                if (playerDist < minDist)
+                if (dist < minDist)
                 {
-                    minDist = playerDist;
-                    tMin = playerTransform.transform;
+                    minDist = dist;
+                    tMin = enemyNPC.transform;
                 }
             }
         }
         return tMin;
-    }
-
-    //Drawn elements on the screen
-    void OnDrawGizmos()
-    {
-        Gizmos.color = Color.yellow;
-        //Gizmos.DrawWireSphere(transform.position, Vector3.Angle(direction, transform.forward));
-
-        Gizmos.color = Color.red;
-        //Gizmos.DrawLine(transform.position, direction);
     }
 }
