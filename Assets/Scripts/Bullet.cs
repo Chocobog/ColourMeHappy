@@ -52,8 +52,15 @@ public class Bullet : MonoBehaviour
                GameObject obj = hit.collider.gameObject;
                 if (obj.tag == "Player" || obj.tag == "Enemy" || obj.tag == "Ally" || obj.tag == "perkGuard")
                 {
-                    obj.SendMessage("takeDamage", damage);
-                    obj.SendMessage("defeatedBy", shooter);
+                    if (shooter.tag == "Player" && obj.tag == "Ally" || shooter.tag == "Ally" && obj.tag == "Player")
+                    {
+                        return;
+                    }
+                    else
+                    {
+                        obj.SendMessage("takeDamage", damage);
+                        obj.SendMessage("defeatedBy", shooter);
+                    }
                 }
             }
         }

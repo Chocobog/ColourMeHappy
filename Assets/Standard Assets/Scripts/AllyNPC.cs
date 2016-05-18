@@ -116,12 +116,15 @@ public class AllyNPC : MonoBehaviour
 
         nav = GetComponent<NavMeshAgent>(); //Get the enemy nav mesh
         animator = GetComponent<Animator>(); //Get the enemy animator
+        fp = playerTransform.GetComponent<FirstPersonController>(); //init player
     }
 
     // Update each frame
     void Update()
     {
         elapsedTime += Time.deltaTime; // Update the time
+        if (fp.EndGame.enabled)
+            nav.Stop();
         // enemy has no health left
         if (health <= 0)
         {
@@ -154,8 +157,11 @@ public class AllyNPC : MonoBehaviour
                 respawned = true;
             }
             else if (hitColliders.Length > 0)
+            {
                 randomSpawn = Random.Range(0, allySpawnPositions.Length); //choose another random location if this one is occupied
-
+                nav.Warp(spawnPoint); //warp back to enemy spawn point
+                respawned = true;
+            }
             //respawn over - set back to default
             if ((int)respawnCountdown == 0)
             {
@@ -177,8 +183,7 @@ public class AllyNPC : MonoBehaviour
                 {
                     //if no allies or player is within distance 
                     animator.Play("idle");
-                    fp = playerTransform.GetComponent<FirstPersonController>(); //used to get location of enemy flag
-                                                                                //if enemy flag has been taken and this instance is the flag carrier
+                    //if enemy flag has been taken and this instance is the flag carrier
                     if (FC && fp.allyFlagLocation.Equals(taken))
                     {
                         Debug.Log("3");
@@ -296,7 +301,7 @@ public class AllyNPC : MonoBehaviour
             allySafe = false;
             //update location of flag
             enemyFlagLocation = atBase;
-            fp.allyFlagLocation = atBase;
+            fp.enemyFlagLocation = atBase;
             fp.isRedFlagCaptured = true;
             foreach (GameObject friends in PlayerAllies)
             {
@@ -328,7 +333,6 @@ public class AllyNPC : MonoBehaviour
                         //if raycast hits enemy
                         if(hit.collider.gameObject == e && enpc.health > 0) {
                             transform.LookAt(e.transform.position); //look at the player
-                            Debug.Log("Found players enemy, Time to Destroy");
                             animator.Play("idle pose with a gun"); //animation
                             //if within a certain radius, run around the player and shoot
                             if (Vector3.Distance(transform.position, e.transform.position) > 150f)

@@ -119,12 +119,15 @@ public class EnemyNPC : MonoBehaviour
   
         nav = GetComponent<NavMeshAgent>(); //Get the enemy nav mesh
         animator = GetComponent<Animator>(); //Get the enemy animator
+        fp = playerTransform.GetComponent<FirstPersonController>(); //init player
     }
 
     // Update each frame
     void Update()
     {
         elapsedTime += Time.deltaTime; // Update the time
+        if (fp.EndGame.enabled)
+            nav.Stop();
         // enemy has no health left
         if (health <= 0)
         {
@@ -149,10 +152,8 @@ public class EnemyNPC : MonoBehaviour
             }
             //if player shot last bullet to kill enemy update score
             if (defeater.Equals(playerTransform.tag) && !invulnerable)
-            {
-                fp = playerTransform.GetComponent<FirstPersonController>();
                 fp.playerScore += scoreUpdate;
-            }
+
             int randomSpawn = Random.Range(0, enemySpawnPositions.Length);
             Vector3 spawnPoint = enemySpawnPositions[randomSpawn].position;
             Collider[] hitColliders = Physics.OverlapSphere(spawnPoint, 0.1f);
@@ -163,8 +164,11 @@ public class EnemyNPC : MonoBehaviour
                 respawned = true;
             }
             else if (hitColliders.Length > 0)
+            {
                 randomSpawn = Random.Range(0, enemySpawnPositions.Length); //choose another random location if this one is occupied
-
+                nav.Warp(spawnPoint); //warp back to enemy spawn point
+                respawned = true;
+            }
             //respawn over - set back to default
             if ((int)respawnCountdown == 0)
             {
@@ -186,8 +190,7 @@ public class EnemyNPC : MonoBehaviour
                 {
                     //if no allies or player is within distance 
                     animator.Play("idle");
-                    fp = playerTransform.GetComponent<FirstPersonController>(); //used to get location of enemy flag
-                                                                                //if enemy flag has been taken and this instance is the flag carrier
+                    //if enemy flag has been taken and this instance is the flag carrier
                     if (FC && fp.enemyFlagLocation.Equals(taken))
                     {
                         Debug.Log("3");
@@ -463,15 +466,5 @@ public class EnemyNPC : MonoBehaviour
             }
         }
         return tMin;
-    }
-
-    //Drawn elements on the screen - DEBUGGING
-    void OnDrawGizmos()
-    {
-        Gizmos.color = Color.yellow;
-        //Gizmos.DrawWireSphere(transform.position, Vector3.Angle(direction, transform.forward));
-
-        Gizmos.color = Color.red;
-        //Gizmos.DrawLine(transform.position, direction);
     }
 }

@@ -1287,17 +1287,11 @@ namespace UnityStandardAssets.Characters.FirstPerson
             {
                 BinaryFormatter bf = new BinaryFormatter();
                 FileStream file = File.Open(Application.persistentDataPath + "/playerScore.dat", FileMode.Open); //open from this location
-
                 PlayerData data = (PlayerData)bf.Deserialize(file);
                 file.Close();
-
                 //load values
-                //health += data.playerHealthMod;
-                //m_RunSpeed += data.playerMoveSpeedMod;
-                //delay -= data.playerReloadSpeedMod;
-                //shootRate -= data.playerFireRateMod;
-                //playerTotalAmmo += data.playerStartingAmmoMod;
                 playerScore = data.finalScore;
+                healthSlider.maxValue = 100 + data.playerHealthMod;
             }
             else
             {
