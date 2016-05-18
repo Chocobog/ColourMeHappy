@@ -227,6 +227,11 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public string taken;
         public bool walkingSound = true;
 
+        private void awake()
+        {
+            Application.targetFrameRate = 30;
+        }
+
         // Use this for initialization
         private void Start()
         {

@@ -73,10 +73,17 @@ public class AllyNPC : MonoBehaviour
 
 
     public bool FC; //Flag carrier
+    public bool allySafe; //checks if the ally is at the safe location
     public bool isAllyFlagCarrier; //changes if any other enemy picks up the flag
     FirstPersonController fp; //first person controller
 
     float randomDecision; //random decision that AI makes
+
+    //when the script has been called
+    private void awake()
+    {
+        Application.targetFrameRate = 30;
+    }
 
     //Initialisation
     void Start()
@@ -105,13 +112,14 @@ public class AllyNPC : MonoBehaviour
         isAllyFlagCarrier = false;
         FC = false;
         respawned = false;
+        allySafe = false;
 
         nav = GetComponent<NavMeshAgent>(); //Get the enemy nav mesh
         animator = GetComponent<Animator>(); //Get the enemy animator
     }
 
     // Update each frame
-    void FixedUpdate()
+    void Update()
     {
         elapsedTime += Time.deltaTime; // Update the time
         // enemy has no health left
@@ -119,7 +127,8 @@ public class AllyNPC : MonoBehaviour
         {
             respawnCountdown -= 1 * Time.deltaTime; //start counter
             //Only plays this animation once
-            animator.Play("dead");
+            if(!respawned)
+                animator.Play("dead");
             respawnEffect.SetActive(true); //respawn effect
             nav.Stop();
             invulnerable = true;
@@ -155,6 +164,7 @@ public class AllyNPC : MonoBehaviour
                 invulnerable = false;
                 respawnCountdown = respawnReset;
                 respawnEffect.SetActive(false);
+                respawned = false;
             }
         }
         else
@@ -162,76 +172,88 @@ public class AllyNPC : MonoBehaviour
             //Enemy is alive
             foreach (GameObject enemy in enemies)
             {
-                //if no allies or player is within distance 
-                animator.Play("idle");
-                fp = playerTransform.GetComponent<FirstPersonController>(); //used to get location of enemy flag
-                //if enemy flag has been taken and this instance is the flag carrier
-                if (FC && fp.allyFlagLocation.Equals(taken))
+                //sanity check
+                if (GameObject.FindGameObjectWithTag(allyFlag) && GameObject.FindGameObjectWithTag(opposingFlag))
                 {
-                    Debug.Log("3");
-                    nav.CalculatePath(GameObject.FindGameObjectWithTag("allySafeSpot").transform.position, path);
-                    nav.SetPath(path);
-                }
-                //if this enemy is not the FC and we have taken player flag OR if both teams have taken the flag
-                else if (!FC && isAllyFlagCarrier || enemyFlagLocation.Equals(taken) && fp.allyFlagLocation.Equals(taken))
-                {
-
-                    //Randomly choose to find allies/player and destroy or follow to protect the FC
-                    if (randomDecision == 0)
+                    //if no allies or player is within distance 
+                    animator.Play("idle");
+                    fp = playerTransform.GetComponent<FirstPersonController>(); //used to get location of enemy flag
+                                                                                //if enemy flag has been taken and this instance is the flag carrier
+                    if (FC && fp.allyFlagLocation.Equals(taken))
                     {
-                        Debug.Log("5");
-                        nav.CalculatePath(closestEnemy(PlayerAllies).position, path); //Go to closest allie or player
+                        Debug.Log("3");
+                        nav.CalculatePath(GameObject.FindGameObjectWithTag("allySafeSpot").transform.position, path);
                         nav.SetPath(path);
                     }
-                    else
+                    //if this enemy is not the FC and we have taken player flag OR if both teams have taken the flag
+                    else if (!FC && isAllyFlagCarrier || enemyFlagLocation.Equals(taken) && fp.allyFlagLocation.Equals(taken))
                     {
-                        Debug.Log("6");
-                        nav.CalculatePath(GameObject.FindGameObjectWithTag(opposingFlag).transform.position, path); //Go to FC
-                        nav.SetPath(path);
-                        //if within 20f of the FC
-                        if (Vector3.Distance(nav.transform.position, GameObject.FindGameObjectWithTag("allySafeSpot").transform.position) < 100f)
+
+                        //Randomly choose to find allies/player and destroy or follow to protect the FC
+                        if (randomDecision == 0)
                         {
-                            nav.CalculatePath(closestEnemy(PlayerAllies).position, path); //Go to closest allie or player
+                            Debug.Log("5");
+                            nav.CalculatePath(closestEnemy(enemies).position, path); //Go to closest allie or player
                             nav.SetPath(path);
                         }
-                        else if (Vector3.Distance(nav.transform.position, GameObject.FindGameObjectWithTag(opposingFlag).transform.position) < 20f)
+                        else
                         {
-                            nav.CalculatePath(GameObject.FindGameObjectWithTag(allyFlag).transform.position, path);
+                            Debug.Log("6");
+                            nav.CalculatePath(GameObject.FindGameObjectWithTag(allyFlag).transform.position, path); //Go to FC
+                            nav.SetPath(path);
+                            //if within 100f of the FC
+                            if (Vector3.Distance(nav.transform.position, GameObject.FindGameObjectWithTag("allySafeSpot").transform.position) < 100f)
+                            {
+                                randomDecision = 0;
+                                allySafe = true;
+                            }
+                            //if within 20f of the FC
+                            else if (Vector3.Distance(nav.transform.position, GameObject.FindGameObjectWithTag(allyFlag).transform.position) < 20f && fp.allyFlagLocation.Equals(atBase))
+                            {
+                                nav.CalculatePath(GameObject.FindGameObjectWithTag(opposingFlag).transform.position, path);
+                                nav.SetPath(path);
+                            }
+                        }
+                    }
+                    //if player has taken enemy flag and this instance is now an FC
+                    else if (fp.allyFlagLocation.Equals(taken) && GameObject.FindGameObjectWithTag(opposingFlag) && GameObject.FindGameObjectWithTag(allyFlag))
+                    {
+                        //if distance to player flag is < then distance to enemy flag then go to the player flag
+                        if (Vector3.Distance(transform.position, GameObject.FindGameObjectWithTag(opposingFlag).transform.position) < Vector3.Distance(transform.position, GameObject.FindGameObjectWithTag(allyFlag).transform.position))
+                        {
+                            Debug.Log("8");
+                            nav.CalculatePath(GameObject.FindGameObjectWithTag(opposingFlag).transform.position, path); //get player flag
+                            nav.SetPath(path);
+                        }
+                        else
+                        {
+                            Debug.Log("9");
+                            nav.CalculatePath(GameObject.FindGameObjectWithTag(allyFlag).transform.position, path); //go to enemy flag
                             nav.SetPath(path);
                         }
                     }
-                }
-                //if player has taken enemy flag and this instance is now an FC
-                else if (fp.allyFlagLocation.Equals(taken))
-                {
-                    //if distance to player flag is < then distance to enemy flag then go to the player flag
-                    if (Vector3.Distance(transform.position, GameObject.FindGameObjectWithTag(opposingFlag).transform.position) < Vector3.Distance(transform.position, GameObject.FindGameObjectWithTag(allyFlag).transform.position))
+                    //if your the flag carrier and enemy flag is at the base
+                    else if (FC && fp.allyFlagLocation.Equals(atBase))
                     {
-                        Debug.Log("8");
-                        nav.CalculatePath(GameObject.FindGameObjectWithTag(opposingFlag).transform.position, path); //get player flag
+                        Debug.Log("4");
+                        nav.CalculatePath(GameObject.FindGameObjectWithTag(allyFlag).transform.position, path); //go back to flag for capture
                         nav.SetPath(path);
                     }
+
+                    //if blue flag is at the base, attempt to capture flag
+                    else if (enemyFlagLocation.Equals(atBase) && GameObject.FindGameObjectWithTag(opposingFlag))
+                    {
+                        Debug.Log("7");
+                        nav.CalculatePath(GameObject.FindGameObjectWithTag(opposingFlag).transform.position, path);
+                        nav.SetPath(path);
+                    }
+                    //dont hit any of the conditions then go for the other flag
                     else
                     {
-                        Debug.Log("9");
-                        nav.CalculatePath(GameObject.FindGameObjectWithTag(allyFlag).transform.position, path); //go to enemy flag
+                        nav.CalculatePath(GameObject.FindGameObjectWithTag(opposingFlag).transform.position, path);
                         nav.SetPath(path);
                     }
-                }
-                //if your the flag carrier and enemy flag is at the base
-                else if (FC && fp.allyFlagLocation.Equals(atBase))
-                {
-                    Debug.Log("4");
-                    nav.CalculatePath(GameObject.FindGameObjectWithTag(allyFlag).transform.position, path); //go back to flag for capture
-                    nav.SetPath(path);
-                }
 
-                //if blue flag is at the base, attempt to capture flag
-                else if (enemyFlagLocation.Equals(atBase) && GameObject.FindGameObjectWithTag(opposingFlag))
-                {
-                    Debug.Log("7");
-                    nav.CalculatePath(GameObject.FindGameObjectWithTag(opposingFlag).transform.position, path);
-                    nav.SetPath(path);
                 }
             }
         }
@@ -271,6 +293,7 @@ public class AllyNPC : MonoBehaviour
             isAllyFlagCarrier = false;
             fp.scoreAlly++;
             Destroy(flag.gameObject); //Destroy the flag gameObject
+            allySafe = false;
             //update location of flag
             enemyFlagLocation = atBase;
             fp.allyFlagLocation = atBase;
@@ -290,6 +313,8 @@ public class AllyNPC : MonoBehaviour
     {
         //if player within enemy radius
         foreach (GameObject e in enemies) {
+            //instantiate
+            EnemyNPC enpc = e.GetComponent<EnemyNPC>();
             if (c.gameObject == e)
             {
                 Vector3 direction = c.transform.position - transform.position; //direction of player
@@ -301,7 +326,7 @@ public class AllyNPC : MonoBehaviour
                     if (Physics.Raycast(transform.position + transform.up, direction, out hit, 400))
                     {
                         //if raycast hits enemy
-                        if(hit.collider.gameObject == e) {
+                        if(hit.collider.gameObject == e && enpc.health > 0) {
                             transform.LookAt(e.transform.position); //look at the player
                             Debug.Log("Found players enemy, Time to Destroy");
                             animator.Play("idle pose with a gun"); //animation
