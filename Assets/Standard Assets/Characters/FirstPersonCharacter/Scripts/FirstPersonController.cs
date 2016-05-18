@@ -1289,7 +1289,13 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 FileStream file = File.Open(Application.persistentDataPath + "/playerScore.dat", FileMode.Open); //open from this location
                 PlayerData data = (PlayerData)bf.Deserialize(file);
                 file.Close();
+
                 //load values
+                health += data.playerHealthMod;
+                m_RunSpeed -= data.playerMoveSpeedMod;
+                shootRate -= data.playerFireRateMod;
+                playerTotalAmmo += data.playerStartingAmmoMod;
+                delay -= data.playerReloadSpeedMod;
                 playerScore = data.finalScore;
                 healthSlider.maxValue = 100 + data.playerHealthMod;
             }
