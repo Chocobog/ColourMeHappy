@@ -111,7 +111,7 @@ public class EnemyNPC : MonoBehaviour
         respawnReset = 10f;
         respawnCountdown = respawnReset; // set respawn timer
         showMarker = false;
-        scoreUpdate = 10;
+        scoreUpdate = 100;
         isEnemyFlagCarrier = false;
         FC = false;
         respawned = false;

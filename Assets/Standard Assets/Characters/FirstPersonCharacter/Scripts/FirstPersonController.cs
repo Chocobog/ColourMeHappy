@@ -208,6 +208,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public float delayReset = 1.5f;
         public float delay = 1.5f;
         public string delayTextTime;
+        public bool canShoot;
 
         //exit/end game interface
         public Canvas pauseMenu;
@@ -227,6 +228,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public string taken;
         public bool walkingSound = true;
 
+        public GameObject pauseMap; //map on the pause menu
+
         private void awake()
         {
             Application.targetFrameRate = 30;
@@ -235,7 +238,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         // Use this for initialization
         private void Start()
         {
-            //Cursor.visible = false;
+            Cursor.visible = false;
             m_CharacterController = GetComponent<CharacterController>();
             m_Camera = Camera.main;
             m_OriginalCameraPosition = m_Camera.transform.localPosition;
@@ -252,6 +255,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             cameraMove = true;
             unloading = false;
             reloading = false;
+            canShoot = true;
 
             //how fast player can run
             m_RunSpeed = 35;
@@ -346,7 +350,10 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
             //Open pause menu on ESC
             if (Input.GetKeyDown(KeyCode.Escape))
+            {
                 openPauseMenu();
+                pauseMap.SetActive(true);
+            }
 
             //Use your perk when C is pressed
             if (Input.GetKeyDown(KeyCode.C) && currentPerks.Count != 0)
@@ -610,7 +617,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             //Player shooting via mouse click
             if (Input.GetButton("Fire1"))
             {
-                if (elapsedTime >= shootRate)
+                if (elapsedTime >= shootRate && canShoot)
                 {
                     //Reset the time
                     elapsedTime = 0.0f;
@@ -892,6 +899,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             canMove = false;
             cameraMove = false;
             playerScoreTxt.enabled = true;
+            Cursor.visible = true;
             //open menu saying play again or main menu
         }
 
@@ -1186,7 +1194,9 @@ namespace UnityStandardAssets.Characters.FirstPerson
             pauseMenu.enabled = true;
             cameraMove = false;
             canMove = false;
+            canShoot = false;
             playerScoreTxt.enabled = true;
+            Cursor.visible = true;
         }
 
         //Load the main menu
@@ -1198,10 +1208,13 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         //return back to the game - resume selected on pause menu
         public void backToGame() {
+            canShoot = true;
+            pauseMap.SetActive(false);
             pauseMenu.enabled = false;
             playerScoreTxt.enabled = false;
             cameraMove = true;
             canMove = true;
+            Cursor.visible = false;
         }
 
         //return back to pause menu - no selected on quit menu
