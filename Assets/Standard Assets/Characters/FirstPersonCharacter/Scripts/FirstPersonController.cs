@@ -1208,9 +1208,9 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         //return back to the game - resume selected on pause menu
         public void backToGame() {
+            pauseMenu.enabled = false;
             canShoot = true;
             pauseMap.SetActive(false);
-            pauseMenu.enabled = false;
             playerScoreTxt.enabled = false;
             cameraMove = true;
             canMove = true;
