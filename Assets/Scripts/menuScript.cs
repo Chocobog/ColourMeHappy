@@ -2,6 +2,8 @@
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using System.Collections;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.IO;
 
 
 /*
@@ -40,11 +42,13 @@ public class menuScript : MonoBehaviour {
     public Image progressBackground;
     public Image progressFill;
 
-
-
-
-	// Use this for initialization
-	void Start () {
+    //Tutorial
+    public bool tutorialPlayed;
+    public Canvas playTutorialPrompt;
+    
+    // Use this for initialization
+    void Start () {
+        loadPlayerData(); //load data 
         quitMenu = quitMenu.GetComponent<Canvas>();
         start = start.GetComponent<Button>();
         exit = exit.GetComponent<Button>();
@@ -108,6 +112,28 @@ public class menuScript : MonoBehaviour {
 
     // Load the first level
     public void startLevel() {
+        if (tutorialPlayed)
+            StartCoroutine(LoadScreen("MainLevel"));
+        else
+            playTutorialPrompt.enabled = true;
+    }
+
+    //function that handles tutorial play
+    public void playTutorial()
+    {
+        StartCoroutine(LoadScreen("Tutorial"));
+
+    }
+
+    // handles the tutorial prompting
+    public void backToMenu()
+    {
+        playTutorialPrompt.enabled = false;
+    }
+
+    //ignore the tutorial and play the game
+    public void ignoreTutorial()
+    {
         StartCoroutine(LoadScreen("MainLevel"));
     }
 
@@ -133,6 +159,40 @@ public class menuScript : MonoBehaviour {
             //Update progress bar
             progressBar.value = (int)(async.progress * 100);
             yield return null;
+        }
+    }
+
+    /* 
+    * This method saves the tutorials boolean value and will allow -
+    * the player to ignore the tutorial prompt on 
+    * their second attempt to play the game-
+    */
+    public void saveTutorialStatus()
+    {
+        BinaryFormatter bf = new BinaryFormatter();
+        FileStream file = File.Create(Application.persistentDataPath + "/playerScore.dat"); //save to this location
+
+        PlayerData data = new PlayerData();
+        data.playerTutorialCompleted = tutorialPlayed;
+
+        bf.Serialize(file, data);
+        file.Close();
+    }
+
+    // loads the player data of the player from previous games
+    public void loadPlayerData()
+    {
+        if (File.Exists(Application.persistentDataPath + "/playerScore.dat"))
+        {
+            BinaryFormatter bf = new BinaryFormatter();
+            FileStream file = File.Open(Application.persistentDataPath + "/playerScore.dat", FileMode.Open); //open from this location
+
+            PlayerData data = (PlayerData)bf.Deserialize(file);
+            file.Close();
+
+            //load values
+            tutorialPlayed = data.playerTutorialCompleted;
+            Debug.Log(tutorialPlayed);
         }
     }
 

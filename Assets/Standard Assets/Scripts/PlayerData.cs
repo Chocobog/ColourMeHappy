@@ -4,9 +4,10 @@ using System;
 using UnityEngine.UI;
 /*
 * Written by: Joshua Hurn
-* Last Modified: 04/05/2016
+* Last Modified: Jake Nye 04/05/2016
 *
-* This class saves the players data and allows the upgrades script to give modifications to the player
+* This class saves the players data and allows the upgrades script to give modifications to the player,
+ * also includes the variable that triggers the tutorial on select of 'Play'.
 */
 [Serializable]
 public class PlayerData {
@@ -14,9 +15,10 @@ public class PlayerData {
     public int finalScore;
     public int playerHealthMod;
     public int playerMoveSpeedMod;
-    public float playerReloadSpeedMod;
+	public float playerReloadSpeedMod;
     public float playerFireRateMod;
     public int playerStartingAmmoMod;
+	public bool playerTutorialCompleted = false;
 
     //save where the counter is for the images
     public int counterHealth;
