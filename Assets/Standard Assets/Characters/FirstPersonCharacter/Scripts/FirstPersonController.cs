@@ -303,6 +303,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
             //Set player score
             loadPlayerData();
+
+            health = totalHealth; //update total health of player
         }
 
         // Update is called once per frame
@@ -315,7 +317,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
             //update HUD elements
             healthTxt.text = health.ToString();
-            healthSlider.value = health;
+            healthSlider.value = totalHealth;
             ammoSlider.value = playerClip;
             gameTimeLeftTxt.text = "Time left: " + displayTime;
             playerAmmoTxt.text = playerClip.ToString() + " / " + playerTotalAmmo.ToString();
@@ -1304,7 +1306,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 file.Close();
 
                 //load values
-                health += data.playerHealthMod;
+                totalHealth = health + data.playerHealthMod;
                 m_RunSpeed -= data.playerMoveSpeedMod;
                 shootRate -= data.playerFireRateMod;
                 playerTotalAmmo += data.playerStartingAmmoMod;
