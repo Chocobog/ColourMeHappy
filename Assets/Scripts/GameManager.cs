@@ -66,7 +66,7 @@ public class GameManager : MonoBehaviour
         {
             outOfBoundsTimer -= 1 * Time.deltaTime; //start counter
             textTime = string.Format("{0:0}", outOfBoundsTimer); //Show out of bounds message
-            OutOfBounds.text = "Out of bounds, please return to the game in " + textTime + " seconds or you will be shot";
+            OutOfBounds.text = "Out of bounds, please return to the game in " + textTime;
             OutOfBounds.pixelOffset = new Vector2(0, 180); // ensure text is centred on screen
             OutOfBounds.enabled = true;
             //if timer reaches 0 Destroy object and reset timer

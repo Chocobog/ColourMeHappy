@@ -15,8 +15,8 @@ public class PlayerData {
     public int finalScore;
     public int playerHealthMod;
     public int playerMoveSpeedMod;
-	public float playerReloadSpeedMod;
-    public float playerFireRateMod;
+	public float playerReloadSpeedMod = 0.0f;
+    public float playerFireRateMod = 0.0f;
     public int playerStartingAmmoMod;
 	public bool playerTutorialCompleted = false;
 

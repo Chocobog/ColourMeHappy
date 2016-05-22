@@ -15,8 +15,8 @@ public class MenuUpgrades : MonoBehaviour {
 	public int menuScore = 0;       // stores player accumulated upgradePoints
 	public int menuHealth = 0;      // stores player health stat
     public int menuMoveSpeed = 0;   // stores player movement speed
-    public float menuReloadSpeed = 0; // stores player reloading speed
-	public float menuFireRate = 0f;    // stores player firing rate
+    public float menuReloadSpeed = 0.0f; // stores player reloading speed
+	public float menuFireRate = 0.0f;    // stores player firing rate
     public int menuStartingAmmo = 0;// stores player starting paintball/ammo capacity
 
     // Health Upgrade variables
@@ -137,7 +137,7 @@ public class MenuUpgrades : MonoBehaviour {
             {
                 healthImg[i].enabled = true;
                 healthAssignOnce = !healthAssignOnce;
-                incHP.text = "+ " + (menuHealth) + "HP";
+                incHP.text = "+" + (menuHealth) + "HP";
                 upgradeCost += 200;
                 savePlayerData();
             }
@@ -152,7 +152,7 @@ public class MenuUpgrades : MonoBehaviour {
             {
                 moveSpeedImg[i].enabled = true;
                 moveSpeedAssignOnce = !moveSpeedAssignOnce;
-                incMS.text = "+ " + (menuMoveSpeed) + "%";
+                incMS.text = "+" + (menuMoveSpeed) + "%";
                 upgradeCostms += 200;
                 savePlayerData();
             }
@@ -167,7 +167,7 @@ public class MenuUpgrades : MonoBehaviour {
             {
                 rapidFireImg[i].enabled = true;
                 rapidFireAssignOnce = !rapidFireAssignOnce;
-                incRF.text = "- " + (menuFireRate) + " Seconds";
+                incRF.text = (menuFireRate) + " Seconds";
                 upgradeCostRF += 200;
                 savePlayerData();
             }
@@ -182,7 +182,7 @@ public class MenuUpgrades : MonoBehaviour {
             {
                 reloadImg[i].enabled = true;
                 reloadSpeedAssignOnce = !reloadSpeedAssignOnce;
-                incRS.text = "- " + (menuReloadSpeed) + " Seconds";
+                incRS.text = (menuReloadSpeed) + " Seconds";
                 upgradeCostRS += 200;
                 savePlayerData();
             }
@@ -197,7 +197,7 @@ public class MenuUpgrades : MonoBehaviour {
             {
                 startAmmoImg[i].enabled = true;
                 startingAmmoAssignOnce = !startingAmmoAssignOnce;
-                incStartAmmo.text = "+ " + (menuStartingAmmo) + " paintballs";
+                incStartAmmo.text = "+" + (menuStartingAmmo) + " paintballs";
                 upgradeCostStartAmmo += 200;
                 savePlayerData();
             }
@@ -209,7 +209,7 @@ public class MenuUpgrades : MonoBehaviour {
 	// handles the health upgrade system
 	public void upgradeHealth() {
         //add one to the counter, update will take care of the image showing    
-        if ((menuScore >= upgradeCost) && (menuScore != 0))
+        if ((menuScore >= upgradeCost) && (menuScore != 0) && !upgradeImg5)
         {
             menuScore -= upgradeCost;
             healthCounter++;
@@ -226,7 +226,7 @@ public class MenuUpgrades : MonoBehaviour {
     //handles the move speed upgrade system
     public void upgradeMoveSpeed()
     {
-        if ((menuScore >= upgradeCostms) && (menuScore != 0))
+        if ((menuScore >= upgradeCostms) && (menuScore != 0) && !upgradeImg5ms)
         {
             menuScore -= upgradeCostms;
             moveSpeedCounter++;
@@ -243,7 +243,7 @@ public class MenuUpgrades : MonoBehaviour {
     //handles the raid fire upgrade system
     public void upgradeRapidFire()
     {
-        if ((menuScore >= upgradeCostRF) && (menuScore != 0))
+        if ((menuScore >= upgradeCostRF) && (menuScore != 0) && !upgradeImg5RapidFire)
         {
             menuScore -= upgradeCostRF;
             rapidFireCounter++;
@@ -260,7 +260,7 @@ public class MenuUpgrades : MonoBehaviour {
     //handles the reload speed upgrade system
     public void upgradeReloadSpeed()
     {
-        if ((menuScore >= upgradeCostRS) && (menuScore != 0))
+        if ((menuScore >= upgradeCostRS) && (menuScore != 0) && !upgradeImg5ReloadSpeed)
         {
             menuScore -= upgradeCostRS;
             reloadSpeedCounter++;
@@ -277,7 +277,7 @@ public class MenuUpgrades : MonoBehaviour {
     //handles the starting ammo upgrade system
     public void upgradeStartAmmo()
     {
-        if ((menuScore >= upgradeCostStartAmmo) && (menuScore != 0))
+        if ((menuScore >= upgradeCostStartAmmo) && (menuScore != 0) && !upgradeImg5StartAmmo)
         {
             menuScore -= upgradeCostStartAmmo;
             startAmmoCounter++;
@@ -304,10 +304,12 @@ public class MenuUpgrades : MonoBehaviour {
 
             //load score for menu upgrades
             menuScore = data.finalScore;
+            menuScore = 10000;
             menuHealth = data.playerHealthMod;
             menuMoveSpeed = data.playerMoveSpeedMod;
             menuReloadSpeed = data.playerReloadSpeedMod;
             menuStartingAmmo = data.playerStartingAmmoMod;
+            menuFireRate = data.playerFireRateMod;
 
             healthCounter = data.counterHealth;
             moveSpeedCounter = data.counterMoveSpeed;
@@ -332,13 +334,13 @@ public class MenuUpgrades : MonoBehaviour {
         data.playerHealthMod = menuHealth;
         data.playerMoveSpeedMod = menuMoveSpeed;
         data.playerReloadSpeedMod = menuReloadSpeed;
-        data.playerFireRateMod = menuReloadSpeed;
+        data.playerFireRateMod = menuFireRate;
         data.playerStartingAmmoMod = menuStartingAmmo;
 
         data.counterHealth = healthCounter;
         data.counterMoveSpeed = moveSpeedCounter;
         data.counterRapidFire = rapidFireCounter;
-        data.counterReloadSpeed = rapidFireCounter;
+        data.counterReloadSpeed = reloadSpeedCounter;
         data.counterStartingAmmo = startAmmoCounter;
 
         bf.Serialize(file, data);

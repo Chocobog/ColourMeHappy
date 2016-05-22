@@ -177,7 +177,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public float redFlagCapturedCountdown;
         public float blueFlagRetrievedCountdown;
         public float redFlagRetrievedCountdown;
-        public float flagCountdownReset = 3f;
+        public float flagCountdownReset = 5f;
 
         //damage effects
         public float flashSpeed = 5f;
