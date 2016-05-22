@@ -121,8 +121,9 @@ public class menuScript : MonoBehaviour {
     //function that handles tutorial play
     public void playTutorial()
     {
+        tutorialPlayed = true;
+        savePlayerData();
         StartCoroutine(LoadScreen("Tutorial"));
-
     }
 
     // handles the tutorial prompting
@@ -134,6 +135,8 @@ public class menuScript : MonoBehaviour {
     //ignore the tutorial and play the game
     public void ignoreTutorial()
     {
+        tutorialPlayed = true;
+        savePlayerData();
         StartCoroutine(LoadScreen("MainLevel"));
     }
 
@@ -193,6 +196,21 @@ public class menuScript : MonoBehaviour {
             //load values
             tutorialPlayed = data.playerTutorialCompleted;
         }
+    }
+
+    //saves the players upgrades for the player to load in game
+    public void savePlayerData()
+    {
+        BinaryFormatter bf = new BinaryFormatter();
+        FileStream file = File.Create(Application.persistentDataPath + "/playerScore.dat"); //save to this location
+
+        PlayerData data = new PlayerData(); //instantiate player data
+
+        //save values to player data for the player
+        data.playerTutorialCompleted = tutorialPlayed;
+
+        bf.Serialize(file, data);
+        file.Close();
     }
 
     // exits the game
