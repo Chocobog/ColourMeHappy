@@ -192,7 +192,6 @@ public class menuScript : MonoBehaviour {
 
             //load values
             tutorialPlayed = data.playerTutorialCompleted;
-            Debug.Log(tutorialPlayed);
         }
     }
 

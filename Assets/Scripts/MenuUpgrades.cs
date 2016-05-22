@@ -304,7 +304,6 @@ public class MenuUpgrades : MonoBehaviour {
 
             //load score for menu upgrades
             menuScore = data.finalScore;
-            menuScore = 10000;
             menuHealth = data.playerHealthMod;
             menuMoveSpeed = data.playerMoveSpeedMod;
             menuReloadSpeed = data.playerReloadSpeedMod;
