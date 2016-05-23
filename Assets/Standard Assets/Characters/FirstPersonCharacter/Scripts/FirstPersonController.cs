@@ -317,7 +317,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
             //update HUD elements
             healthTxt.text = health.ToString();
-            healthSlider.value = totalHealth;
+            healthSlider.value = health;
             ammoSlider.value = playerClip;
             gameTimeLeftTxt.text = "Time left: " + displayTime;
             playerAmmoTxt.text = playerClip.ToString() + " / " + playerTotalAmmo.ToString();
@@ -1210,8 +1210,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         //return back to the game - resume selected on pause menu
         public void backToGame() {
-            pauseMenu.enabled = false;
             canShoot = true;
+            pauseMenu.enabled = false;
             pauseMap.SetActive(false);
             playerScoreTxt.enabled = false;
             cameraMove = true;
@@ -1271,10 +1271,16 @@ namespace UnityStandardAssets.Characters.FirstPerson
             if (code.Equals("utterDefeat"))
                 scoreEnemy = scoreLimit;
 
+            if (code.Equals("goldenPoint"))
+            {
+                scoreAlly = 0;
+                scoreEnemy = 0;
+                gameTimeLeft = 0;
+            }
+
             inputField.text = "";
             inputField.DeactivateInputField();
             inputField.gameObject.SetActive(false);
-            Debug.Log("Hitting this");
         }
 
         public void outOfBounds()

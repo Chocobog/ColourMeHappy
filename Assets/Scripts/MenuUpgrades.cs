@@ -209,7 +209,7 @@ public class MenuUpgrades : MonoBehaviour {
 	// handles the health upgrade system
 	public void upgradeHealth() {
         //add one to the counter, update will take care of the image showing    
-        if ((menuScore >= upgradeCost) && (menuScore != 0) && !upgradeImg5)
+        if ((menuScore >= upgradeCost) && (menuScore != 0) && (upgradeImg5.enabled == false))
         {
             menuScore -= upgradeCost;
             healthCounter++;
@@ -226,7 +226,7 @@ public class MenuUpgrades : MonoBehaviour {
     //handles the move speed upgrade system
     public void upgradeMoveSpeed()
     {
-        if ((menuScore >= upgradeCostms) && (menuScore != 0) && !upgradeImg5ms)
+        if ((menuScore >= upgradeCostms) && (menuScore != 0) && (upgradeImg5ms.enabled == false))
         {
             menuScore -= upgradeCostms;
             moveSpeedCounter++;
@@ -243,7 +243,7 @@ public class MenuUpgrades : MonoBehaviour {
     //handles the raid fire upgrade system
     public void upgradeRapidFire()
     {
-        if ((menuScore >= upgradeCostRF) && (menuScore != 0) && !upgradeImg5RapidFire)
+        if ((menuScore >= upgradeCostRF) && (menuScore != 0) && (upgradeImg5RapidFire.enabled == false))
         {
             menuScore -= upgradeCostRF;
             rapidFireCounter++;
@@ -260,7 +260,7 @@ public class MenuUpgrades : MonoBehaviour {
     //handles the reload speed upgrade system
     public void upgradeReloadSpeed()
     {
-        if ((menuScore >= upgradeCostRS) && (menuScore != 0) && !upgradeImg5ReloadSpeed)
+        if ((menuScore >= upgradeCostRS) && (menuScore != 0) && (upgradeImg5ReloadSpeed.enabled == false))
         {
             menuScore -= upgradeCostRS;
             reloadSpeedCounter++;
@@ -277,7 +277,7 @@ public class MenuUpgrades : MonoBehaviour {
     //handles the starting ammo upgrade system
     public void upgradeStartAmmo()
     {
-        if ((menuScore >= upgradeCostStartAmmo) && (menuScore != 0) && !upgradeImg5StartAmmo)
+        if ((menuScore >= upgradeCostStartAmmo) && (menuScore != 0) && (upgradeImg5StartAmmo.enabled == false))
         {
             menuScore -= upgradeCostStartAmmo;
             startAmmoCounter++;

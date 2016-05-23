@@ -47,7 +47,7 @@ public class SimpleFSM : MonoBehaviour
 	public float attackRange = 30.0f;
 	public float attackRangeStop = 25.0f;
     public int rotSpeed = 11;
-    public float chaseSpeed = 4.0f;
+    public float chaseSpeed = 3.0f;
 
     private NavMeshAgent nav;
     public int waypointLocation = 0;
@@ -58,6 +58,11 @@ public class SimpleFSM : MonoBehaviour
     public float respawnReset;
     public GameObject respawnEffect;
     public Transform[] guardSpawnPosition = new Transform[2];
+	public float guardSpawn = 8.0f;
+	public float npcSpawnTimer = 0.0f;
+	public GameObject botGuard;
+	public GameObject botGuard2;
+	public float takeOff = 4.0f;
 
     //who defeated this enemy
     public string defeater;
@@ -78,14 +83,14 @@ public class SimpleFSM : MonoBehaviour
         curState = FSMState.Patrol;
 
         bDead = false;
-        elapsedTime = 0.0f;
+		elapsedTime = 0.0f;
         //scoreUpdate = 10;
-        respawnReset = 10f;
+        respawnReset = 8f;
         // set respawn timer
         respawnCountdown = respawnReset;
         // Get the target enemy(Player)
         GameObject objPlayer = GameObject.FindGameObjectWithTag("Player");
-        playerTransform = objPlayer.transform;
+		playerTransform = objPlayer.transform;
 
         //make the nav mesh accessible
         nav = GetComponent<NavMeshAgent>();
@@ -98,6 +103,7 @@ public class SimpleFSM : MonoBehaviour
 
     // Update each frame
     void Update() {
+		npcSpawnTimer = npcSpawnTimer * Time.deltaTime;
         switch (curState)
         {
             case FSMState.Patrol: UpdatePatrolState(); break;
@@ -107,62 +113,43 @@ public class SimpleFSM : MonoBehaviour
         }
 
         // Update the time
-        elapsedTime += Time.deltaTime;
+		elapsedTime += Time.deltaTime;
 
         // Go to dead state if no health left
-        if (health <= 0)
-        {
+		if (health <= 0) {
+
+			// enemy has no health left
+			respawnCountdown -= 1 * Time.deltaTime; //start counter
+			respawnEffect.SetActive (true); //respawn effect
             curState = FSMState.Dead;
-            // enemy has no health left
-            respawnCountdown -= 1 * Time.deltaTime; //start counter
-            respawnEffect.SetActive(true); //respawn effect
-            nav.velocity = Vector3.zero;
-            nav.Stop();
-            invulnerable = true;
-
-            ////if player shot last bullet to kill enemy update score
-            //if (defeater.Equals(playerTransform.tag) && !invulnerable)
-            //{
-            //    fp = playerTransform.GetComponent<FirstPersonController>();
-            //    fp.playerScore += scoreUpdate;
-            //    Debug.Log(fp.playerScore);
-            //}
-
-            //take back to guard spawn position after a 3 second wait
-            if (transform.position != guardSpawnPosition[0].position && (int)respawnCountdown == (int)respawnReset - 2)
+            //reset to default
+            if ((int)respawnCountdown == 0) {
                 nav.Warp(guardSpawnPosition[0].position);
-                transform.Rotate(0f, rotSpeed * Time.deltaTime + 7, 0f);
-                AudioSource.PlayClipAtPoint(reboot, transform.position);
-            //reset the respawn counter
-            if ((int)respawnCountdown == 0)
-            {
                 nav.ResetPath(); //reset navigation path
-                health = 100;
-                invulnerable = false;
-                respawnCountdown = respawnReset;
-                respawnEffect.SetActive(false);
+				health = 100;
+				invulnerable = false;
+				respawnCountdown = respawnReset;
+				respawnEffect.SetActive (false);
             }
-        }
+            
+        } else {
+            //says that the FSM is not dead
+            bDead = false;
+            //distance from player to FSM
+            float distance = Vector3.Distance (transform.position, playerTransform.position);
 
+			//State transitions
+			if ((distance <= chaseRange) & (distance > attackRangeStop)) {
+				curState = FSMState.Chase;
+			} else if (distance > chaseRange) {
+				curState = FSMState.Patrol;
+			}
 
-        //
-        float distance = Vector3.Distance(transform.position, playerTransform.position);
-
-        //State transitions
-        if ((distance <= chaseRange) & (distance > attackRangeStop))
-        {
-            curState = FSMState.Chase;
-        }
-        else if (distance > chaseRange)
-        {
-			curState = FSMState.Patrol;
-        }
-
-        // Attack state change
-        if (distance <= attackRange)
-        {
-            curState = FSMState.Attack;
-        }
+			// Attack state change
+			if (distance <= attackRange) {
+				curState = FSMState.Attack;
+			}
+		}
 
        
     }
@@ -171,9 +158,9 @@ public class SimpleFSM : MonoBehaviour
     * Used to find out who shot the final bullet to kill the enemy
     * @string s: Origin of the bullet that was shot
     */
-    public void defeatedBy(string s)
+    public void defeatedBy(GameObject s)
     {
-        defeater = s;
+        defeater = s.tag;
     }
 
     protected Vector3 destPos;
@@ -204,7 +191,7 @@ public class SimpleFSM : MonoBehaviour
         // Check the distance
         // When the distance is near, transition to chase state
         if (Vector3.Distance(transform.position, playerTransform.position) <= chaseRange) {
-            curState = FSMState.Chase;
+			curState = FSMState.Chase;
         }
     }
     /*
@@ -253,15 +240,15 @@ public class SimpleFSM : MonoBehaviour
      * Dead state
      */
     protected void UpdateDeadState() {
-        // Show the dead animation with some physics effects
-        if (!bDead) {
+		// Show the dead animation with some physics effects
+		if (!bDead) {
             bDead = true;
             nav.Stop();
-            nav.enabled = false;
-
-        }
+            invulnerable = true;
+            Debug.Log ("hitting this!");
+		}
     }
-
+			
 
     /*
      * Shoot Bullet

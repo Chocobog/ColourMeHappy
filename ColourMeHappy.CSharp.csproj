@@ -69,6 +69,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Campfire\Script\FireLightScript.cs" />
     <Compile Include="Assets\DesertFortressPack\Scripts\open_door.cs" />
     <Compile Include="Assets\Rocks and Boulders 2\Shaders\Desaturate\DesaturateEffect.cs" />
     <Compile Include="Assets\Rocks and Boulders 2\Shaders\RotateGameObject.cs" />
@@ -97,6 +98,7 @@
     <Compile Include="Assets\Scripts\Orb.cs" />
     <Compile Include="Assets\Scripts\PerkGuardNodePoint.cs" />
     <Compile Include="Assets\Scripts\SimpleFSM.cs" />
+    <Compile Include="Assets\Scripts\Tutorial.cs" />
     <Compile Include="Assets\Scripts\WaterAudio.cs" />
     <Compile Include="Assets\Scripts\healthPickup.cs" />
     <Compile Include="Assets\Scripts\menuScript.cs" />
@@ -109,6 +111,7 @@
     <Compile Include="Assets\_MK\_MKGlowSystem\_Internal\MKGlowSystemHelpWindow.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Assets\Campfire\License.txt" />
     <None Include="Assets\Flag\Shaders\FlagCulling.shader" />
     <None Include="Assets\Fonts\hammerhead2\readme.txt" />
     <None Include="Assets\Rocks and Boulders 2\Shaders\Blend SM2.shader" />
@@ -176,6 +179,7 @@
     <None Include="Assets\Standard Assets\Characters\RollerBall\RollerBallGuidelines.txt" />
     <None Include="Assets\Standard Assets\Characters\ThirdPersonCharacter\ThirdPersonCharacterGuidelines.txt" />
     <None Include="Assets\Standard Assets\CrossPlatformInput\CrossPlatformInputGuidelines.txt" />
+    <None Include="Assets\Standard Assets\Effects\GlassRefraction\Shaders\GlassStainedBumpDistort.shader" />
     <None Include="Assets\Standard Assets\Environment\Water (Basic)\Shaders\FXWaterBasic.shader" />
     <None Include="Assets\Standard Assets\Environment\Water\Water\Shaders\FXWaterPro.shader" />
     <None Include="Assets\Standard Assets\Environment\Water\Water4\Shaders\FXWater4Advanced.shader" />
