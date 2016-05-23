@@ -165,30 +165,13 @@ public class menuScript : MonoBehaviour {
         }
     }
 
-    /* 
-    * This method saves the tutorials boolean value and will allow -
-    * the player to ignore the tutorial prompt on 
-    * their second attempt to play the game-
-    */
-    public void saveTutorialStatus()
-    {
-        BinaryFormatter bf = new BinaryFormatter();
-        FileStream file = File.Create(Application.persistentDataPath + "/playerScore.dat"); //save to this location
-
-        PlayerData data = new PlayerData();
-        data.playerTutorialCompleted = tutorialPlayed;
-
-        bf.Serialize(file, data);
-        file.Close();
-    }
-
     // loads the player data of the player from previous games
     public void loadPlayerData()
     {
-        if (File.Exists(Application.persistentDataPath + "/playerScore.dat"))
+        if (File.Exists(Application.persistentDataPath + "/tutorial.dat"))
         {
             BinaryFormatter bf = new BinaryFormatter();
-            FileStream file = File.Open(Application.persistentDataPath + "/playerScore.dat", FileMode.Open); //open from this location
+            FileStream file = File.Open(Application.persistentDataPath + "/tutorial.dat", FileMode.Open); //open from this location
 
             PlayerData data = (PlayerData)bf.Deserialize(file);
             file.Close();
@@ -202,7 +185,15 @@ public class menuScript : MonoBehaviour {
     public void savePlayerData()
     {
         BinaryFormatter bf = new BinaryFormatter();
-        FileStream file = File.Create(Application.persistentDataPath + "/playerScore.dat"); //save to this location
+        FileStream file;
+        if (!File.Exists(Application.persistentDataPath + "/tutorial.dat"))
+        {
+            file = File.Create(Application.persistentDataPath + "/tutorial.dat");
+        }//save to this location
+        else
+        {
+            file = File.OpenWrite(Application.persistentDataPath + "/tutorial.dat");
+        }
 
         PlayerData data = new PlayerData(); //instantiate player data
 

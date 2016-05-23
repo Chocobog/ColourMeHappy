@@ -1286,7 +1286,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public void saveScore()
         {
             BinaryFormatter bf = new BinaryFormatter();
-            FileStream file = File.Create(Application.persistentDataPath + "/playerScore.dat"); //save to this location
+            FileStream file = File.OpenWrite(Application.persistentDataPath + "/playerScore.dat"); //save to this location
 
             PlayerData data = new PlayerData();
             data.finalScore = playerScore;
@@ -1303,7 +1303,6 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 BinaryFormatter bf = new BinaryFormatter();
                 FileStream file = File.Open(Application.persistentDataPath + "/playerScore.dat", FileMode.Open); //open from this location
                 PlayerData data = (PlayerData)bf.Deserialize(file);
-                file.Close();
 
                 //load values
                 totalHealth = health + data.playerHealthMod;
@@ -1313,6 +1312,10 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 delay -= data.playerReloadSpeedMod;
                 playerScore = data.finalScore;
                 healthSlider.maxValue = 100 + data.playerHealthMod;
+
+                file.Close();
+
+                
             }
             else
             {

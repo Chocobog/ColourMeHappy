@@ -323,10 +323,17 @@ public class MenuUpgrades : MonoBehaviour {
     //saves the players upgrades for the player to load in game
 	public void savePlayerData()
 	{
-		BinaryFormatter bf = new BinaryFormatter ();
-		FileStream file = File.Create(Application.persistentDataPath + "/playerScore.dat"); //save to this location
-
-		PlayerData data = new PlayerData(); //instantiate player data
+        BinaryFormatter bf = new BinaryFormatter();
+        FileStream file;
+        if (!File.Exists(Application.persistentDataPath + "/playerScore.dat")) {
+            file = File.Create(Application.persistentDataPath + "/playerScore.dat"); //save to this location if file doesn't exist
+        }
+        else
+        {
+            file = File.OpenWrite(Application.persistentDataPath + "/playerScore.dat"); //append
+        }
+            
+        PlayerData data = new PlayerData(); //instantiate player data
 
         //save values to player data for the player
         data.finalScore = menuScore;

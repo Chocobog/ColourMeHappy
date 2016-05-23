@@ -18,7 +18,7 @@ public class PlayerData {
 	public float playerReloadSpeedMod = 0.0f;
     public float playerFireRateMod = 0.0f;
     public int playerStartingAmmoMod;
-	public bool playerTutorialCompleted = false;
+	public bool playerTutorialCompleted;
 
     //save where the counter is for the images
     public int counterHealth;
