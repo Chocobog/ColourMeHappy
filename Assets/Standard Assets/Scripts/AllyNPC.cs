@@ -338,7 +338,7 @@ public class AllyNPC : MonoBehaviour
                             if (Vector3.Distance(transform.position, e.transform.position) > 150f)
                                 nav.SetDestination(e.transform.position);
                             else
-                                nav.Move(transform.TransformDirection(Vector3.left) * (10 * Time.deltaTime)); //move to the left
+                                nav.Move(transform.TransformDirection(Vector3.left) * (1 * Time.deltaTime)); //move to the left
                             ShootBullet();
                         }
                     }

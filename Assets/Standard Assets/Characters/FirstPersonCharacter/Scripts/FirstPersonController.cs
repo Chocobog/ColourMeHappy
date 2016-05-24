@@ -79,6 +79,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public int pickupAmmo = 5; //when ammo picked up
         public int clipLimit = 10; //When reloading paintballs
         public int playerClip = 10; //ammo clip of player
+        public int gunLimit = 50; //when respawn, reset ammo
         public int playerTotalAmmo = 50; //total ammo of player
         public int scoreAlly; //score of ally team
         public int scoreEnemy; //score of enemy team
@@ -305,6 +306,9 @@ namespace UnityStandardAssets.Characters.FirstPerson
             loadPlayerData();
 
             health = totalHealth; //update total health of player
+
+            //setup ammo for gun
+            gunLimit = playerTotalAmmo;
         }
 
         // Update is called once per frame
@@ -718,6 +722,9 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 //if respawn time is up respawn player
                 if (textTime.Equals("0"))
                 {
+                    //reset ammo
+                    playerTotalAmmo = gunLimit;
+                    playerClip = clipLimit;
                     canMove = true; //allow movement
                     health = 100;
                     respawnCountdown = 10.0f; //reset

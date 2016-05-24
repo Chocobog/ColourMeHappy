@@ -346,7 +346,7 @@ public class EnemyNPC : MonoBehaviour
                             if (Vector3.Distance(transform.position, playerTransform.transform.position) > 150f)
                                 nav.SetDestination(GameObject.FindGameObjectWithTag("Player").transform.position);
                             else
-                                nav.Move(transform.TransformDirection(Vector3.left) * (10 * Time.deltaTime)); //move to the left
+                                nav.Move(transform.TransformDirection(Vector3.left) * (1 * Time.deltaTime)); //move to the left
                             ShootBullet();
                         } else if (hit.collider.gameObject == a && anpc.health > 0)
                         {
@@ -356,7 +356,7 @@ public class EnemyNPC : MonoBehaviour
                             if (Vector3.Distance(transform.position, a.transform.position) > 150f)
                                 nav.SetDestination(a.transform.position);
                             else
-                                nav.Move(transform.TransformDirection(Vector3.left) * (10 * Time.deltaTime)); //move to the left
+                                nav.Move(transform.TransformDirection(Vector3.left) * (1 * Time.deltaTime)); //move to the left
                             ShootBullet();
                         }
                         
