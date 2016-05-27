@@ -42,10 +42,20 @@ public class menuScript : MonoBehaviour {
     public Image progressBackground;
     public Image progressFill;
 
-    //Tutorial
+    //Tutorial menu canvas
     public bool tutorialPlayed;
     public Canvas playTutorialPrompt;
-    
+    public Canvas movement;
+    public Canvas shooting;
+    public Canvas retrieveFlag;
+    public Canvas incEnemies;
+
+    //Checkpoints
+    public GameObject checkPoint1;
+    public GameObject enemy1;
+    public GameObject enemySpawnPoint;
+
+
     // Use this for initialization
     void Start () {
         loadPlayerData(); //load data 
@@ -56,14 +66,18 @@ public class menuScript : MonoBehaviour {
         optionsMenu.enabled = false;
         upgradesMenu.enabled = false;
 		creditsPage.enabled = false;
-		howToPlayPage.enabled = false;
+        howToPlayPage.enabled = false;
         progressBackground.enabled = false;
-        progressFill.enabled = false;        
+        progressFill.enabled = false;
+
+
+        //shooting.enabled = false;
+
 	}
 
-	// handles the displaying and vertical movement of the credits canvas
-	public void rollCredits() {
-		startMenu.enabled = false;
+    // handles the displaying and vertical movement of the credits canvas
+    public void rollCredits() {
+        startMenu.enabled = false;
 		creditsPage.enabled = true;
 	}
 
@@ -140,6 +154,8 @@ public class menuScript : MonoBehaviour {
         StartCoroutine(LoadScreen("MainLevel"));
     }
 
+
+
     /*
     * show loading screen while level loads in the backgrund
     * @String level: level to load
@@ -163,6 +179,36 @@ public class menuScript : MonoBehaviour {
             progressBar.value = (int)(async.progress * 100);
             yield return null;
         }
+    }
+
+    // OnTriggerEnter is called when a collider enters this trigger
+    void OnTriggerEnter(Collider collide)
+    {
+        //if the box collider is breached by the player, destroy this object
+        if (collide.gameObject.tag == "Player")
+        {
+            Destroy(checkPoint1);
+            Debug.Log(tag);
+            //canvas1.disappear
+            movement.enabled = false;
+            //canvas2.appear
+            shooting.enabled = true;
+            //enable checkPointTwo
+            //Instantiate(enemy1, enemySpawnPoint.transform.position, enemySpawnPoint.transform.rotation);
+            StartCoroutine(disableShootCanvas(10.0f));
+        }
+            
+    }
+
+    IEnumerator disableShootCanvas(float waitFor)
+    {
+        //shooting.text = message;
+        //shooting.enabled = true;
+        Debug.Log("waiting...");
+        yield return new WaitForSeconds(waitFor);
+        Debug.Log("Wait end.");
+        shooting.enabled = false;
+
     }
 
     // loads the player data of the player from previous games
@@ -205,7 +251,9 @@ public class menuScript : MonoBehaviour {
     }
 
     // exits the game
-    public void exitGame() {
+    public void exitGame()
+    {
         Application.Quit();
     }
+
 }
