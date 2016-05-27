@@ -56,12 +56,6 @@
     <Reference Include="UnityEngine.Networking">
       <HintPath>Library\UnityAssemblies\UnityEngine.Networking.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.Networking">
-      <HintPath>Library\UnityAssemblies\UnityEngine.Networking.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UI">
-      <HintPath>Library\UnityAssemblies\UnityEngine.UI.dll</HintPath>
-    </Reference>
     <Reference Include="UnityEditor">
       <HintPath>Library\UnityAssemblies\UnityEditor.dll</HintPath>
     </Reference>
@@ -94,6 +88,7 @@
     <Compile Include="Assets\Rocks and Boulders 2\Standard Assets\Image Effects (Pro Only)\VortexEffect.cs" />
     <Compile Include="Assets\Scripts\AmmoPickup.cs" />
     <Compile Include="Assets\Scripts\Bullet.cs" />
+    <Compile Include="Assets\Scripts\ChkPoint.cs" />
     <Compile Include="Assets\Scripts\GameManager.cs" />
     <Compile Include="Assets\Scripts\Gradient.cs" />
     <Compile Include="Assets\Scripts\MenuUpgrades.cs" />
@@ -104,11 +99,16 @@
     <Compile Include="Assets\Scripts\SimpleFSM.cs" />
     <Compile Include="Assets\Scripts\Tutorial.cs" />
     <Compile Include="Assets\Scripts\WaterAudio.cs" />
+    <Compile Include="Assets\Scripts\finalCheckPoint.cs" />
     <Compile Include="Assets\Scripts\healthPickup.cs" />
     <Compile Include="Assets\Scripts\menuScript.cs" />
+    <Compile Include="Assets\Scripts\passedFirst.cs" />
+    <Compile Include="Assets\Scripts\passedFourth.cs" />
+    <Compile Include="Assets\Scripts\passedThird.cs" />
     <Compile Include="Assets\Scripts\smartCrosshair.cs" />
     <Compile Include="Assets\Scripts\toDelete\AllySpawnManager.cs" />
     <Compile Include="Assets\Scripts\toDelete\EnemySpawnManager.cs" />
+    <Compile Include="Assets\Scripts\tutFSM.cs" />
     <Compile Include="Assets\_MK\_MKGlowSystem\_Demo\Code\MK_DemoControl.cs" />
     <Compile Include="Assets\_MK\_MKGlowSystem\_Demo\Code\MK_RotateObject.cs" />
     <Compile Include="Assets\_MK\_MKGlowSystem\_Internal\MKGlow.cs" />
