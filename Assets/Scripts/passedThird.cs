@@ -24,22 +24,27 @@ public class passedThird : MonoBehaviour {
             //shooting.enabled = false;
             retrieveFlag.enabled = false;
             usingPerks.enabled = true;
-        }
-    }
 
-    public void OnTriggerExit(Collider col) {
-        if (col.gameObject.tag == "Player") {
-            //Instantiate(Enemy, EnemySpawn1.transform.position, EnemySpawn1.transform.rotation);
-            //Instantiate(Enemy, EnemySpawn2.transform.position, EnemySpawn2.transform.rotation);
             Instantiate(Enemy, EnemySpawn3.transform.position, EnemySpawn3.transform.rotation);
-            Instantiate(Enemy, EnemySpawn4.transform.position, EnemySpawn4.transform.rotation);
-
-            // assigns the node to the waypoint component
+            //Instantiate(Enemy, EnemySpawn4.transform.position, EnemySpawn4.transform.rotation);
             Enemy.GetComponent<tutFSM>().waypoint = GameObject.FindGameObjectWithTag("spawnNodeEnemy");
             //Enemy.GetComponent<tutFSM>().guardSpawnPosition = GameObject.FindGameObjectWithTag("respawnNodeEnemy");
-
+            Debug.Log("Called.");
         }
     }
-	
+
+    //public void OnTriggerExit(Collider col) {
+    //    if (col.gameObject.tag == "Player") {
+
+    //        //Instantiate(Enemy, EnemySpawn1.transform.position, EnemySpawn1.transform.rotation);
+    //        //Instantiate(Enemy, EnemySpawn2.transform.position, EnemySpawn2.transform.rotation);
+    //        Instantiate(Enemy, EnemySpawn3.transform.position, EnemySpawn3.transform.rotation);
+    //        Instantiate(Enemy, EnemySpawn4.transform.position, EnemySpawn4.transform.rotation);
+
+    //        //assigns the node to the waypoint component
+    //        Enemy.GetComponent<tutFSM>().waypoint = GameObject.FindGameObjectWithTag("spawnNodeEnemy");
+    //        //Enemy.GetComponent<tutFSM>().guardSpawnPosition = GameObject.FindGameObjectWithTag("respawnNodeEnemy");
+    //    }
+    //}
 
 }
