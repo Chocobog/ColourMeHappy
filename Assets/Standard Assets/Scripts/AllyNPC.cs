@@ -156,7 +156,7 @@ public class AllyNPC : MonoBehaviour
                 nav.Warp(spawnPoint); //warp back to enemy spawn point
                 respawned = true;
             }
-            else if (hitColliders.Length > 0)
+            else if (hitColliders.Length > 0 && !respawned)
             {
                 randomSpawn = Random.Range(0, allySpawnPositions.Length); //choose another random location if this one is occupied
                 nav.Warp(spawnPoint); //warp back to enemy spawn point

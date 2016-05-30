@@ -1,18 +1,18 @@
 ﻿using UnityEngine;
-using System.Collections;
 using UnityStandardAssets.Characters.FirstPerson;
 
 /*
  * Written by: AJ Abotomey
  * Modified by: Jake Nye 
- * Last Modified: 03/05/2016
+ * Last Modified: 30/05/2016
  * 
  * This class handles all of the npc Finite State Machine state transitions throughout
- * ColourMeHappy's game.
+ * ColourMeHappy's game tutorial.
 */
 
 public class tutFSM : MonoBehaviour
 {
+    //states
     public enum FSMState
     {
         None,
@@ -24,9 +24,6 @@ public class tutFSM : MonoBehaviour
 
     // Current state that the NPC is reaching
     public FSMState curState;
-
-    //waypoints
-    public GameObject[] waypointList;
 
     protected Transform playerTransform;// Player Transform
 
@@ -49,10 +46,9 @@ public class tutFSM : MonoBehaviour
     public int rotSpeed = 11;
     public float chaseSpeed = 3.0f;
 
-    private NavMeshAgent nav;
-    public int waypointLocation = 0;
+
+    private NavMeshAgent nav; //navmesh
     public GameObject waypoint;
-    public float centralPos;
 
     //respawning
     public float respawnCountdown;
@@ -70,23 +66,13 @@ public class tutFSM : MonoBehaviour
     public bool invulnerable;
     FirstPersonController fp;
 
-    // audio reboot clip
-    public AudioClip reboot;
 
-    //player score update
-    private int scoreUpdate;
-
-    /*
-     * Initialize the Finite state machine for the NPC tank
-     */
+     // Initialize the Finite state machine
     void Start()
     {
-
         curState = FSMState.Patrol;
-
         bDead = false;
         elapsedTime = 0.0f;
-        //scoreUpdate = 10;
         respawnReset = 8f;
         // set respawn timer
         respawnCountdown = respawnReset;
@@ -96,11 +82,10 @@ public class tutFSM : MonoBehaviour
 
         //make the nav mesh accessible
         nav = GetComponent<NavMeshAgent>();
-        nav.SetDestination(waypoint.transform.position);
+        nav.SetDestination(playerTransform.position);
 
         if (!playerTransform)
             print("Player doesn't exist.. Please add one with Tag named 'Player'");
-
     }
 
 
@@ -122,22 +107,7 @@ public class tutFSM : MonoBehaviour
         // Go to dead state if no health left
         if (health <= 0)
         {
-
-            // enemy has no health left
-            respawnCountdown -= 1 * Time.deltaTime; //start counter
-            respawnEffect.SetActive(true); //respawn effect
-            curState = FSMState.Dead;
-            //reset to default
-            if ((int)respawnCountdown == 0)
-            {
-                nav.Warp(guardSpawnPosition[0].position);
-                nav.ResetPath(); //reset navigation path
-                health = 100;
-                invulnerable = false;
-                respawnCountdown = respawnReset;
-                respawnEffect.SetActive(false);
-            }
-
+            Destroy(gameObject);
         }
         else {
             //says that the FSM is not dead
@@ -176,40 +146,17 @@ public class tutFSM : MonoBehaviour
 
     protected Vector3 destPos;
 
-    /*
-     * Patrol state
-     */
+     // Patrol state
     protected void UpdatePatrolState()
     {
-
-        //move to next waypoint
-        if (Vector3.Distance(nav.transform.position, waypoint.transform.position) <= 2.0f)
-        {
-            //waypointLocation++;
-
-            ////loop back
-            //if (waypointLocation >= waypointList.Length)
-            //    waypointLocation = 0;
-
-            //nav.SetDestination(waypointList[waypointLocation].transform.position);
-
-        }
-        //move to first waypoint or resume going to waypoint
-        else
-        {
-            nav.SetDestination(playerTransform.transform.position); //traverses to the player's position once passed the node
-        }
-
         // Check the distance
-        // When the distance is near, transition to chase state
         if (Vector3.Distance(transform.position, playerTransform.position) <= chaseRange)
         {
             curState = FSMState.Chase;
         }
     }
-    /*
-     * Chase state
-	 */
+
+    // Chase state
     protected void UpdateChaseState()
     {
         //Move to player
@@ -220,6 +167,7 @@ public class tutFSM : MonoBehaviour
         {
             curState = FSMState.Attack;
         }
+
         // Go back to patrol is it become too far
         else if (dist >= chaseRange)
         {
@@ -227,10 +175,7 @@ public class tutFSM : MonoBehaviour
         }
     }
 
-    /*
-	 * Attack state
-	 */
-    //public GameObject perkGuard;
+	//Attack state
     protected void UpdateAttackState()
     {
         float dist = Vector3.Distance(transform.position, playerTransform.position);
@@ -243,10 +188,10 @@ public class tutFSM : MonoBehaviour
             // Shoot the bullets
             ShootBullet();
         }
-        // Check the distance with the player tank
+        // Check the distance 
         if (dist > attackRange)
             curState = FSMState.Chase;
-        // Transition to patrol if the tank is too far
+        // Transition to patrol 
         else if (dist > chaseRange)
         {
             nav.Resume();
@@ -254,9 +199,7 @@ public class tutFSM : MonoBehaviour
         }
     }
 
-    /*
-     * Dead state
-     */
+    // Dead state
     protected void UpdateDeadState()
     {
         // Show the dead animation with some physics effects
@@ -265,14 +208,10 @@ public class tutFSM : MonoBehaviour
             bDead = true;
             nav.Stop();
             invulnerable = true;
-            Debug.Log("hitting this!");
         }
     }
 
-
-    /*
-     * Shoot Bullet
-     */
+    //Shoot Bullet
     private void ShootBullet()
     {
         if (elapsedTime >= shootRate)
@@ -286,24 +225,12 @@ public class tutFSM : MonoBehaviour
         }
     }
 
-    // Apply Damage if hit by bullet
+    /*
+    * Apply Damage if hit by bullet
+    * @int damage: damage taken from bullet
+    */
     public void takeDamage(int damage)
     {
         health -= damage;
-        Debug.Log(health);
     }
-
-
-    void OnDrawGizmos()
-    {
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, chaseRange);
-
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, attackRange);
-
-        Gizmos.color = Color.blue;
-        Gizmos.DrawWireSphere(transform.position, attackRangeStop);
-    }
-
 }

@@ -1,5 +1,11 @@
 ﻿using UnityEngine;
-using System.Collections;
+
+/*
+* Written By: Jake Nye
+* Last Modified: 30/05/2016
+*
+* This class handles the interaction with the 3rd checkpoint
+*/
 
 public class passedThird : MonoBehaviour {
 
@@ -16,35 +22,19 @@ public class passedThird : MonoBehaviour {
     public GameObject EnemySpawn3;
     public GameObject EnemySpawn4;
 
-    public GameObject respawnNodeEnemy;
-
+    /*
+    * Ontrigger call to register end of tutorial!
+    * @Collider col: Object that collides with the checkpoint
+    */
     public void OnTriggerEnter(Collider col) {
+        //if object is the player
         if (col.gameObject.tag == "Player") {
-            //movement.enabled = false;
-            //shooting.enabled = false;
             retrieveFlag.enabled = false;
             usingPerks.enabled = true;
 
+            //instantiate enemies
             Instantiate(Enemy, EnemySpawn3.transform.position, EnemySpawn3.transform.rotation);
-            //Instantiate(Enemy, EnemySpawn4.transform.position, EnemySpawn4.transform.rotation);
             Enemy.GetComponent<tutFSM>().waypoint = GameObject.FindGameObjectWithTag("spawnNodeEnemy");
-            //Enemy.GetComponent<tutFSM>().guardSpawnPosition = GameObject.FindGameObjectWithTag("respawnNodeEnemy");
-            Debug.Log("Called.");
         }
     }
-
-    //public void OnTriggerExit(Collider col) {
-    //    if (col.gameObject.tag == "Player") {
-
-    //        //Instantiate(Enemy, EnemySpawn1.transform.position, EnemySpawn1.transform.rotation);
-    //        //Instantiate(Enemy, EnemySpawn2.transform.position, EnemySpawn2.transform.rotation);
-    //        Instantiate(Enemy, EnemySpawn3.transform.position, EnemySpawn3.transform.rotation);
-    //        Instantiate(Enemy, EnemySpawn4.transform.position, EnemySpawn4.transform.rotation);
-
-    //        //assigns the node to the waypoint component
-    //        Enemy.GetComponent<tutFSM>().waypoint = GameObject.FindGameObjectWithTag("spawnNodeEnemy");
-    //        //Enemy.GetComponent<tutFSM>().guardSpawnPosition = GameObject.FindGameObjectWithTag("respawnNodeEnemy");
-    //    }
-    //}
-
 }

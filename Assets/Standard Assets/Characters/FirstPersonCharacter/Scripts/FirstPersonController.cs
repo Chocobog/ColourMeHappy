@@ -726,7 +726,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
                     playerTotalAmmo = gunLimit;
                     playerClip = clipLimit;
                     canMove = true; //allow movement
-                    health = 100;
+                    health = totalHealth; //reset health
                     respawnCountdown = 10.0f; //reset
                     respawnInfo.enabled = false; //turn off GUI element
                     respawnEffect.SetActive(false); //effect for respawning
