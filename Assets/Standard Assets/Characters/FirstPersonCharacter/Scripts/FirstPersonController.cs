@@ -88,6 +88,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public GameObject[] perksAvailable; //perks player can activate
         public string enemyFlagLocation; //location of enemy flag
         public string allyFlagLocation; //location of ally flag
+        public bool scoreUpdated = false;
 
         //Perk images
         public Sprite Nimble;
@@ -230,6 +231,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public bool walkingSound = true;
 
         public GameObject pauseMap; //map on the pause menu
+        private bool tutorialPlayed;
 
         private void awake()
         {
@@ -239,6 +241,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         // Use this for initialization
         private void Start()
         {
+            //deleteScore();                                         <<<----- REMOVE AFTER BUG TESTING!!!
             Cursor.visible = false;
             m_CharacterController = GetComponent<CharacterController>();
             m_Camera = Camera.main;
@@ -371,7 +374,9 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 inputField.gameObject.SetActive(true);
                 inputField.ActivateInputField(); //set focus to input field
                 canMove = false; //stop moving while entering code
-            }   
+            }
+
+            
 
             //enter overtime due to draw
             if (isOvertime)
@@ -481,6 +486,9 @@ namespace UnityStandardAssets.Characters.FirstPerson
             //rejuv activated
             if (rejuvCounter)
             {
+                //if die with perk
+                if (health <= 0)
+                    noLongerActivePerkGUI();
                 rejuvCountdown -= 1 * Time.deltaTime; //start countdown
                 if ((int)rejuvCountdown != 0)
                 {
@@ -508,6 +516,9 @@ namespace UnityStandardAssets.Characters.FirstPerson
             //nimble activated
             if (nimbleCounter)
             {
+                //if die with perk
+                if (health <= 0)
+                    noLongerActivePerkGUI();
                 nimbleCountdown -= 1 * Time.deltaTime; //start countdown
                 if ((int)nimbleCountdown != 0 && nimbleFlag)
                 {
@@ -529,6 +540,9 @@ namespace UnityStandardAssets.Characters.FirstPerson
             //rapid fire activated
             if (rapidCounter)
             {
+                //if die with perk
+                if (health <= 0)
+                    noLongerActivePerkGUI();
                 rapidCountdown -= 1 * Time.deltaTime; //start countdown
                 if ((int)rapidCountdown != 0 && rapidFlag)
                 {
@@ -550,6 +564,9 @@ namespace UnityStandardAssets.Characters.FirstPerson
             //shield activated 
             if (shieldCounter)
             {
+                //if die with perk
+                if (health <= 0)
+                    noLongerActivePerkGUI();
                 shieldCountdown -= 1 * Time.deltaTime; //start countdown
                 if ((int)shieldCountdown != 0 && shieldFlag)
                 {
@@ -572,6 +589,9 @@ namespace UnityStandardAssets.Characters.FirstPerson
             //radar shows enemies on the minimap
             if (radarCounter)
             {
+                //if die with perk
+                if(health <= 0)
+                    noLongerActivePerkGUI();
                 radarCountdown -= 1 * Time.deltaTime; //start countdown
                 if ((int)radarCountdown != 0)
                 {
@@ -628,8 +648,9 @@ namespace UnityStandardAssets.Characters.FirstPerson
                     //Reset the time
                     elapsedTime = 0.0f;
 
+                    
                     //Shoot bullet if ammo is available and not unloading/reloading
-                    if ((bulletSpawnPoint) && (bullet) && playerClip > 0 || playerTotalAmmo > 0 && unloading == false && reloading == false)
+                    if ((bulletSpawnPoint) && (bullet) && playerClip > 0 && unloading == false && reloading == false)
                     {
                         //update bullet count
                         playerClip--;
@@ -712,7 +733,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
                     isRedFlagRetrieved = true;
                 }
                     //move player back to 1st spawn position
-                    if (transform.position != spawnPositions[0].position)
+                if (transform.position != spawnPositions[0].position)
                     transform.position = spawnPositions[0].position;
                 respawnCountdown -= 1 * Time.deltaTime; //start counter
                 textTime = string.Format("{0:0}", respawnCountdown); //Show respawn message
@@ -890,13 +911,16 @@ namespace UnityStandardAssets.Characters.FirstPerson
         //When time limit reaches 0 the game will end
         public void gameOver()
         {
-            saveScore();
             overtimeCountdown = 0;
-            //disable player input
-            //disable enemy input
             if (scoreAlly > scoreEnemy)
             {
                 //you win
+                if (!scoreUpdated)
+                {
+                    playerScore = playerScore + 1000;
+                    scoreUpdated = true;
+                }
+                        //Debug.Log(playerScore);
                 victory.enabled = true;
             }
             else
@@ -909,6 +933,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             cameraMove = false;
             playerScoreTxt.enabled = true;
             Cursor.visible = true;
+            saveScore();
             //open menu saying play again or main menu
         }
 
@@ -1158,7 +1183,14 @@ namespace UnityStandardAssets.Characters.FirstPerson
             //reload if this is the only ammo the player has
             if (playerClip == 0)
                 playerClip = 0;
-                //reload();
+            //reload();
+            //if total ammo was 0
+            if (playerTotalAmmo == 5)
+            {
+                unloading = true;
+                playerClip += playerTotalAmmo;
+                playerTotalAmmo = 0;
+            }
         }
 
         /*
@@ -1278,6 +1310,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             if (code.Equals("utterDefeat"))
                 scoreEnemy = scoreLimit;
 
+            //puts the game into overtime
             if (code.Equals("goldenPoint"))
             {
                 scoreAlly = 0;
@@ -1285,11 +1318,20 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 gameTimeLeft = 0;
             }
 
+            //sets the tutorial played status to false
+            if (code.Equals("noob"))
+            {
+                tutorialPlayed = false;
+                saveTutorialInfo();
+            }
+
+            //reset input field
             inputField.text = "";
             inputField.DeactivateInputField();
             inputField.gameObject.SetActive(false);
         }
 
+        //if player is out of bounds for to long, set health to 0; essentially respawning the player
         public void outOfBounds()
         {
             health = 0;
@@ -1319,7 +1361,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
                 //load values
                 totalHealth = health + data.playerHealthMod;
-                m_RunSpeed -= data.playerMoveSpeedMod;
+                m_RunSpeed += data.playerMoveSpeedMod;
                 shootRate -= data.playerFireRateMod;
                 playerTotalAmmo += data.playerStartingAmmoMod;
                 delay -= data.playerReloadSpeedMod;
@@ -1362,6 +1404,29 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 progressBar.value = (int)(async.progress * 100);
                 yield return null;
             }
+        }
+
+        //saves the tutorial boolean when cheat code is run
+        public void saveTutorialInfo()
+        {
+            BinaryFormatter bf = new BinaryFormatter();
+            FileStream file;
+            if (!File.Exists(Application.persistentDataPath + "/tutorial.dat"))
+            {
+                file = File.Create(Application.persistentDataPath + "/tutorial.dat");
+            }//save to this location
+            else
+            {
+                file = File.OpenWrite(Application.persistentDataPath + "/tutorial.dat");
+            }
+
+            PlayerData data = new PlayerData(); //instantiate player data
+
+            //save values to player data for the player
+            data.playerTutorialCompleted = tutorialPlayed;
+
+            bf.Serialize(file, data);
+            file.Close();
         }
     }
 }

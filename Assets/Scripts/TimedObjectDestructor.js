@@ -16,7 +16,7 @@ function Awake ()
 function DestroyNow ()
 {
 	if (detachChildren) {
-		transform.DetachChildren ();
+	    transform.DetachChildren ();
 	}
 	DestroyObject (gameObject);
 }

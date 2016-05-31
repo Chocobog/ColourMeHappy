@@ -13,7 +13,7 @@ public class Bullet : MonoBehaviour
 {
 	public GameObject Explosion; //Splash Effect
     public float speed = 200.0f; //speed of bullet
-	public float lifeTime = 3.0f; //lifetime of bullet
+	public float lifeTime = 1.5f; //lifetime of bullet
 	public int damage = 25; //damage from bullet
     private Vector3 newPos; //position of the bullet
     public GameObject shooter; // who shot the bullet

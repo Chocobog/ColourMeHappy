@@ -49,8 +49,9 @@ public class SimpleFSM : MonoBehaviour
     public int rotSpeed = 11;
     public float chaseSpeed = 3.0f;
 
+    //nav mesh 
     private NavMeshAgent nav;
-    public int waypointLocation = 0;
+    public int waypointLocation = 0; //location of waypoint
     public float centralPos;
 
     //respawning
@@ -94,9 +95,6 @@ public class SimpleFSM : MonoBehaviour
 
         //make the nav mesh accessible
         nav = GetComponent<NavMeshAgent>();
-
-        if (!playerTransform)
-            print("Player doesn't exist.. Please add one with Tag named 'Player'");
 
 	}
 
@@ -225,10 +223,10 @@ public class SimpleFSM : MonoBehaviour
             // Shoot the bullets
             ShootBullet();            
         }
-        // Check the distance with the player tank
+        // Check the distance with the player 
         if (dist > attackRange)
             curState = FSMState.Chase;
-        // Transition to patrol if the tank is too far
+        // Transition to patrol if the enemy is too far
         else if (dist > chaseRange)
         {
             nav.Resume();
@@ -245,7 +243,6 @@ public class SimpleFSM : MonoBehaviour
             bDead = true;
             nav.Stop();
             invulnerable = true;
-            Debug.Log ("hitting this!");
 		}
     }
 			
@@ -266,19 +263,5 @@ public class SimpleFSM : MonoBehaviour
     // Apply Damage if hit by bullet
     public void takeDamage(int damage ) {
     	health -= damage;
-        Debug.Log(health);
     }
-
-
-	void OnDrawGizmos () {
-		Gizmos.color = Color.yellow;
-		Gizmos.DrawWireSphere(transform.position, chaseRange);
-
-		Gizmos.color = Color.red;
-		Gizmos.DrawWireSphere(transform.position, attackRange);
-
-        Gizmos.color = Color.blue;
-        Gizmos.DrawWireSphere(transform.position, attackRangeStop);
-	}
-
 }

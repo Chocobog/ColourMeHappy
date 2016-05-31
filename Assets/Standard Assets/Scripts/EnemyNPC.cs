@@ -138,7 +138,6 @@ public class EnemyNPC : MonoBehaviour
                 animator.Play("dead");
             respawnEffect.SetActive(true); //respawn effect
             nav.Stop();            
-            invulnerable = true;
             if (flag != null)
             {
                 Destroy(flag.gameObject); //if enemy has the flag, destroy when the are defeated
@@ -153,8 +152,10 @@ public class EnemyNPC : MonoBehaviour
             }
             //if player shot last bullet to kill enemy update score
             if (defeater.Equals(playerTransform.tag) && !invulnerable)
+            {
                 fp.playerScore += scoreUpdate;
-
+            }
+            invulnerable = true;
             int randomSpawn = Random.Range(0, enemySpawnPositions.Length);
             Vector3 spawnPoint = enemySpawnPositions[randomSpawn].position;
             Collider[] hitColliders = Physics.OverlapSphere(spawnPoint, 0.1f);
@@ -164,7 +165,7 @@ public class EnemyNPC : MonoBehaviour
                 nav.Warp(spawnPoint); //warp back to enemy spawn point
                 respawned = true;
             }
-            else if (hitColliders.Length > 0 && !respawned)
+            else if (hitColliders.Length > 0 && (int)respawnCountdown <= (int)respawnReset - 3 && !respawned)
             {
                 randomSpawn = Random.Range(0, enemySpawnPositions.Length); //choose another random location if this one is occupied
                 nav.Warp(spawnPoint); //warp back to enemy spawn point
@@ -192,7 +193,7 @@ public class EnemyNPC : MonoBehaviour
                 //if enemy flag has been taken and this instance is the flag carrier
                 if (FC && fp.enemyFlagLocation.Equals(taken))
                 {
-                    Debug.Log("3");
+                    //Debug.Log("3");
                     nav.CalculatePath(GameObject.FindGameObjectWithTag("enemySafeSpot").transform.position, path);
                     nav.SetPath(path);
                         
@@ -204,14 +205,14 @@ public class EnemyNPC : MonoBehaviour
                     //Randomly choose to find allies/player and destroy or follow to protect the FC
                     if (randomDecision == 0)
                     {
-                        Debug.Log("5");
+                        //Debug.Log("5");
                         nav.CalculatePath(closestEnemy(PlayerAllies).position, path); //Go to closest allie or player
                         nav.SetPath(path);
                     }
                     else
                     {
 
-                        Debug.Log("6");
+                        //Debug.Log("6");
                         nav.CalculatePath(GameObject.FindGameObjectWithTag(opposingFlag).transform.position, path); //Go to FC
                         nav.SetPath(path);
                         //if within 20f of the FC
@@ -233,13 +234,13 @@ public class EnemyNPC : MonoBehaviour
                     //if distance to player flag is < then distance to enemy flag then go to the player flag
                     if (Vector3.Distance(transform.position, GameObject.FindGameObjectWithTag(opposingFlag).transform.position) < Vector3.Distance(transform.position, GameObject.FindGameObjectWithTag(allyFlag).transform.position))
                     {
-                        Debug.Log("8");
+                        //Debug.Log("8");
                         nav.CalculatePath(GameObject.FindGameObjectWithTag(opposingFlag).transform.position, path); //get player flag
                         nav.SetPath(path);
                     }
                     else
                     {
-                        Debug.Log("9");
+                        //Debug.Log("9");
                         nav.CalculatePath(GameObject.FindGameObjectWithTag(allyFlag).transform.position, path); //go to enemy flag
                         nav.SetPath(path);
                     }
@@ -247,7 +248,7 @@ public class EnemyNPC : MonoBehaviour
                 //if your the flag carrier and enemy flag is at the base
                 else if (FC && fp.enemyFlagLocation.Equals(atBase) && GameObject.FindGameObjectWithTag(allyFlag))
                 {
-                    Debug.Log("4");
+                    //Debug.Log("4");
                     nav.CalculatePath(GameObject.FindGameObjectWithTag(allyFlag).transform.position, path); //go back to flag for capture
                     nav.SetPath(path);
                 }
@@ -255,7 +256,7 @@ public class EnemyNPC : MonoBehaviour
                 //if blue flag is at the base, attempt to capture flag
                 else if (allyFlagLocation.Equals(atBase) && GameObject.FindGameObjectWithTag(opposingFlag))
                 {
-                    Debug.Log("7");
+                    //Debug.Log("7");
                     nav.CalculatePath(GameObject.FindGameObjectWithTag(opposingFlag).transform.position, path);
                     nav.SetPath(path);
                 }

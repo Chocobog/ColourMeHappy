@@ -357,5 +357,6 @@ public class MenuUpgrades : MonoBehaviour {
     public void deleteScore()
     {
         File.Delete(Application.persistentDataPath + "/playerScore.dat"); //delete from this location
+        File.Delete(Application.persistentDataPath + "/tutorial.dat"); //delete from this location
     }
 }
